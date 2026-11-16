@@ -1,0 +1,742 @@
+This is a **Solidity CRUD practical** for managing student/user records on the blockchain.
+
+CRUD means:
+
+- **C — Create** → add a student
+- **R — Read** → view a student
+- **U — Update** → modify a student
+- **D — Delete** → delete a student
+
+---
+
+## 1. Basic theory
+
+The contract is called:
+
+```solidity
+contract Student
+```
+
+It stores student information in the blockchain using a **struct** and an **array**.
+
+The basic flow is:
+
+```text
+Create → Read → Update → Delete
+   ↓       ↓       ↓       ↓
+ Add     View    Modify   Remove
+Student  Student Student  Student
+```
+
+---
+
+# 2. `struct User`
+
+```solidity
+struct User {
+    uint id;
+    string name;
+}
+```
+
+A `struct` is a **custom data type** that groups related information.
+
+Here, every student has:
+
+```text
+id
+name
+```
+
+For example:
+
+```text
+ID = 1
+Name = "Rahul"
+```
+
+---
+
+# 3. Users array
+
+```solidity
+User[] public users;
+```
+
+This creates an array that stores all students.
+
+For example:
+
+```text
+users[0] → ID: 1, Name: Rahul
+users[1] → ID: 2, Name: Priya
+users[2] → ID: 3, Name: Amit
+```
+
+Because `users` is declared `public`, Solidity automatically creates a getter for the array elements.
+
+---
+
+# 4. `nextId`
+
+```solidity
+uint public nextId = 1;
+```
+
+This keeps track of the next student ID.
+
+Initially:
+
+```text
+nextId = 1
+```
+
+After creating the first student:
+
+```text
+nextId = 2
+```
+
+After creating the second:
+
+```text
+nextId = 3
+```
+
+So every new student gets a different ID.
+
+---
+
+# 5. CREATE operation
+
+The `create()` function adds a new student.
+
+```solidity
+function create(string memory name) public {
+    users.push(User(nextId, name));
+    nextId++;
+}
+```
+
+Suppose we call:
+
+```text
+create("Rahul")
+```
+
+The contract executes:
+
+```solidity
+users.push(User(nextId, name));
+```
+
+Since:
+
+```text
+nextId = 1
+name = Rahul
+```
+
+the following record is added:
+
+```text
+ID     Name
+1      Rahul
+```
+
+Then:
+
+```solidity
+nextId++;
+```
+
+changes:
+
+```text
+1 → 2
+```
+
+### In simple words
+
+**`create()` = Add a new student.**
+
+---
+
+# 6. READ operation
+
+```solidity
+function read(uint id) public view returns (uint, string memory) {
+    uint index = find(id);
+
+    require(index < users.length, "User does not exist");
+
+    return (users[index].id, users[index].name);
+}
+```
+
+Suppose we call:
+
+```text
+read(1)
+```
+
+First:
+
+```solidity
+uint index = find(id);
+```
+
+The `find()` function searches for student ID `1`.
+
+If it finds:
+
+```text
+ID 1 → index 0
+```
+
+then:
+
+```solidity
+return (users[index].id, users[index].name);
+```
+
+returns:
+
+```text
+1
+Rahul
+```
+
+### `view`
+
+Notice:
+
+```solidity
+public view
+```
+
+`view` means the function **only reads blockchain data** and doesn't modify it.
+
+### In simple words
+
+**`read()` = Find and display a student's details.**
+
+---
+
+# 7. UPDATE operation
+
+```solidity
+function update(uint id, string memory name) public {
+    uint index = find(id);
+
+    require(index < users.length, "User does not exist");
+
+    users[index].name = name;
+}
+```
+
+Suppose we have:
+
+```text
+ID     Name
+1      Rahul
+```
+
+and call:
+
+```text
+update(1, "Rohit")
+```
+
+First `find(1)` finds the array position:
+
+```text
+index = 0
+```
+
+Then:
+
+```solidity
+users[index].name = name;
+```
+
+changes:
+
+```text
+Rahul → Rohit
+```
+
+Now:
+
+```text
+ID     Name
+1      Rohit
+```
+
+### In simple words
+
+**`update()` = Modify an existing student's name.**
+
+---
+
+# 8. DELETE operation
+
+```solidity
+function Delete(uint id) public {
+    uint index = find(id);
+
+    require(index < users.length, "User does not exist");
+
+    delete users[index];
+}
+```
+
+Suppose:
+
+```text
+ID     Name
+1      Rahul
+
+ID     Name
+2      Priya
+```
+
+Call:
+
+```text
+Delete(1)
+```
+
+The contract finds:
+
+```text
+index = 0
+```
+
+Then:
+
+```solidity
+delete users[index];
+```
+
+removes/reset the data at that array position.
+
+After deletion, the slot is cleared and its values become their default values.
+
+Conceptually:
+
+```text
+ID     Name
+0      ""
+```
+
+**Important:** `delete` does **not actually shorten the array**. The array length remains the same, and the deleted element becomes its default value.
+
+### In simple words
+
+**`Delete()` = Remove/reset a student's stored data.**
+
+---
+
+# 9. `find()` function
+
+This is the most important supporting function.
+
+```solidity
+function find(uint id) internal view returns (uint) {
+    for (uint i = 0; i < users.length; i++) {
+        if (users[i].id == id) {
+            return i;
+        }
+    }
+
+    revert("User does not exist");
+}
+```
+
+Its job is to find the **array index** corresponding to a student's ID.
+
+For example:
+
+```text
+users[0] → ID 1 → Rahul
+users[1] → ID 2 → Priya
+users[2] → ID 3 → Amit
+```
+
+If we search:
+
+```text
+find(2)
+```
+
+the loop checks:
+
+```text
+i = 0 → ID 1 ≠ 2
+i = 1 → ID 2 = 2
+```
+
+So it returns:
+
+```text
+1
+```
+
+Notice the difference:
+
+```text
+Student ID = 2
+Array index = 1
+```
+
+This is why the `find()` function is needed.
+
+---
+
+# 10. `for` loop
+
+```solidity
+for (uint i = 0; i < users.length; i++)
+```
+
+This loops through all students.
+
+For example, if there are 3 users:
+
+```text
+i = 0
+i = 1
+i = 2
+```
+
+It checks each user's ID until it finds a match.
+
+---
+
+# 11. `require()`
+
+```solidity
+require(index < users.length, "User does not exist");
+```
+
+`require()` is used for **validation**.
+
+If the condition is true:
+
+```text
+Continue execution
+```
+
+If false:
+
+```text
+Transaction reverts
+```
+
+For example, if there are 3 users and the index is `5`:
+
+```text
+5 < 3 → false
+```
+
+So the transaction fails with:
+
+```text
+User does not exist
+```
+
+---
+
+# 12. `revert()`
+
+Inside `find()`:
+
+```solidity
+revert("User does not exist");
+```
+
+If the loop cannot find the requested ID, the function stops execution and reverts the transaction.
+
+So:
+
+```text
+find(100)
+      ↓
+Search all users
+      ↓
+ID not found
+      ↓
+revert()
+      ↓
+"User does not exist"
+```
+
+---
+
+# 13. `memory`
+
+You see:
+
+```solidity
+string memory name
+```
+
+Strings are reference-type data, so Solidity needs to know where the data is stored.
+
+`memory` means the string is stored temporarily while the function executes.
+
+For example:
+
+```solidity
+function create(string memory name)
+```
+
+means the `name` parameter is temporary during the function call.
+
+---
+
+# 14. `public` vs `internal`
+
+### `public`
+
+```solidity
+function create(...) public
+```
+
+A `public` function can be called externally.
+
+So users can call:
+
+```text
+create()
+read()
+update()
+Delete()
+```
+
+### `internal`
+
+```solidity
+function find(...) internal
+```
+
+`find()` is intended to be used **inside the contract** rather than directly by an external user.
+
+It is a helper function.
+
+---
+
+# 15. Complete working example
+
+Suppose we deploy the contract.
+
+Initially:
+
+```text
+nextId = 1
+users = []
+```
+
+### Create Rahul
+
+Call:
+
+```text
+create("Rahul")
+```
+
+Now:
+
+```text
+ID     Name
+1      Rahul
+```
+
+And:
+
+```text
+nextId = 2
+```
+
+---
+
+### Create Priya
+
+Call:
+
+```text
+create("Priya")
+```
+
+Now:
+
+```text
+ID     Name
+1      Rahul
+2      Priya
+```
+
+And:
+
+```text
+nextId = 3
+```
+
+---
+
+### Read Rahul
+
+Call:
+
+```text
+read(1)
+```
+
+Result:
+
+```text
+1
+Rahul
+```
+
+---
+
+### Update Rahul
+
+Call:
+
+```text
+update(1, "Rohit")
+```
+
+Now:
+
+```text
+ID     Name
+1      Rohit
+2      Priya
+```
+
+---
+
+### Delete Rohit
+
+Call:
+
+```text
+Delete(1)
+```
+
+The first array slot is reset:
+
+```text
+ID     Name
+0      ""
+2      Priya
+```
+
+The array length itself does not decrease.
+
+---
+
+# 16. Very important viva questions
+
+### Q1. What is CRUD?
+
+**C**reate, **R**ead, **U**pdate and **D**elete.
+
+---
+
+### Q2. Why do we use a struct?
+
+A struct groups related data into a single custom data type.
+
+Here:
+
+```solidity
+struct User {
+    uint id;
+    string name;
+}
+```
+
+stores the ID and name of a student together.
+
+---
+
+### Q3. Why is `nextId` used?
+
+It generates a new ID for each student.
+
+```solidity
+users.push(User(nextId, name));
+nextId++;
+```
+
+---
+
+### Q4. Why is `find()` required?
+
+Because the user provides an **ID**, but the array requires an **index**.
+
+For example:
+
+```text
+ID = 5
+Index = 2
+```
+
+`find()` converts the ID into the corresponding array index.
+
+---
+
+### Q5. What does `public` mean?
+
+The function or variable can be accessed externally.
+
+---
+
+### Q6. What does `view` mean?
+
+The function reads blockchain data but does not modify the state.
+
+---
+
+### Q7. What does `require()` do?
+
+It checks a condition. If the condition is false, the transaction is reverted.
+
+---
+
+### Q8. What does `delete users[index]` do?
+
+It resets the selected struct to its default values. It **does not reduce the array length**.
+
+---
+
+### Q9. What is `msg.sender`?
+
+It represents the Ethereum address of the account that called the current function.
+
+Your current contract doesn't use `msg.sender`, but it's a very common Solidity concept.
+
+---
+
+### Q10. Where is the data stored?
+
+Because `users` is a **state variable**, the student records are stored in the contract's persistent blockchain storage.
+
+---
+
+## 17. One-line explanation for practical exam
+
+If the examiner asks **"Explain your practical"**, you can say:
+
+> **"This Solidity practical implements CRUD operations for student records. A struct stores the student's ID and name, while a dynamic array stores multiple students. The `create()` function adds a student, `read()` retrieves student details using the ID, `update()` modifies the name, and `Delete()` removes the stored data. The `find()` function searches the array to convert a student ID into its array index. `require()` validates that the requested student exists."**
+
+### Remember this sequence
+
+**Struct → Array → Create → Find → Read → Update → Delete**
+
+That is essentially the whole practical.

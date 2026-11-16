@@ -1,0 +1,695 @@
+Sure. This is a **Solidity practical for a simple Ethereum-based bank**. For an exam/viva, you mainly need to understand **what the contract does, what each function does, and a few Solidity concepts**.
+
+## 1. Aim of the practical
+
+The aim is to create a **SimpleBank smart contract** where:
+
+- A **manager** controls the bank.
+- Users can **join as clients**.
+- Clients can **deposit Ether**.
+- Clients can **withdraw Ether**.
+- The manager can send **interest** to all clients.
+- Anyone can check the **contract's Ether balance**.
+
+---
+
+# 2. Basic theory
+
+### What is Solidity?
+
+**Solidity** is a programming language used to write **smart contracts** on Ethereum and other EVM-compatible blockchains.
+
+A smart contract is a program stored on the blockchain that executes according to predefined rules.
+
+For example:
+
+```solidity
+contract SimpleBank {
+}
+```
+
+creates a smart contract named `SimpleBank`.
+
+### What is Ether?
+
+Ether (**ETH**) is the cryptocurrency of the Ethereum network.
+
+In Solidity, Ether is commonly represented in units such as:
+
+```text
+1 ether
+1 gwei
+1 wei
+```
+
+The smallest unit is **wei**.
+
+```text
+1 ether = 10^18 wei
+```
+
+---
+
+# 3. Important concepts used in your practical
+
+## `pragma`
+
+```solidity
+pragma solidity >=0.7.0 <0.9.0;
+```
+
+This tells the compiler which Solidity versions can compile the contract.
+
+---
+
+## Contract
+
+```solidity
+contract SimpleBank {
+```
+
+A contract is similar to a **class** in programming. It contains data and functions.
+
+---
+
+## Struct
+
+```solidity
+struct client_account{
+    int client_id;
+    address client_address;
+    uint client_balance_in_ether;
+}
+```
+
+A `struct` is used to create a custom data type containing multiple pieces of information.
+
+Here each client has:
+
+| Variable | Meaning |
+|---|---|
+| `client_id` | Unique ID of client |
+| `client_address` | Ethereum wallet address |
+| `client_balance_in_ether` | Stored balance |
+
+**Important:** In this particular code, `client_balance_in_ether` is stored when the client joins, but it is **not updated when deposits/withdrawals happen**. So don't assume it represents the current balance.
+
+---
+
+# 4. Client array
+
+```solidity
+client_account[] clients;
+```
+
+This creates a dynamic array that stores all registered clients.
+
+For example:
+
+```text
+clients[0] → Client 0
+clients[1] → Client 1
+clients[2] → Client 2
+```
+
+---
+
+# 5. Client counter
+
+```solidity
+int clientCounter;
+```
+
+This keeps track of client IDs.
+
+Initially:
+
+```solidity
+clientCounter = 0;
+```
+
+When a new client joins:
+
+```solidity
+clientCounter++
+```
+
+So IDs can become:
+
+```text
+Client 0
+Client 1
+Client 2
+...
+```
+
+---
+
+# 6. Manager
+
+```solidity
+address payable manager;
+```
+
+`address` represents an Ethereum account address.
+
+`payable` means the address can be used for Ether transfers.
+
+So:
+
+```solidity
+address payable manager;
+```
+
+means the contract stores the manager's Ethereum address and can send Ether to it.
+
+---
+
+# 7. Modifier
+
+Modifiers are used to **restrict access to functions**.
+
+### Manager modifier
+
+```solidity
+modifier onlyManager() {
+    require(msg.sender == manager, "Only manager can call this!");
+    _;
+}
+```
+
+It checks:
+
+```text
+Is the person calling the function the manager?
+       |
+      YES → execute function
+       |
+       NO → reject transaction
+```
+
+For example:
+
+```solidity
+function sendInterest() public payable onlyManager
+```
+
+means only the manager can execute `sendInterest()`.
+
+---
+
+# 8. Client modifier
+
+```solidity
+modifier onlyClients() {
+    bool isclient = false;
+
+    for(uint i=0; i<clients.length; i++){
+        if(clients[i].client_address == msg.sender){
+            isclient = true;
+            break;
+        }
+    }
+
+    require(isclient, "Only clients can call this!");
+    _;
+}
+```
+
+This checks whether the caller is already registered as a client.
+
+The contract goes through the `clients` array and compares:
+
+```solidity
+clients[i].client_address == msg.sender
+```
+
+If they match:
+
+```text
+isclient = true
+```
+
+and the function can execute.
+
+---
+
+# 9. Constructor
+
+```solidity
+constructor() {
+    clientCounter = 0;
+}
+```
+
+The constructor executes when the contract is **deployed**.
+
+Here it initializes:
+
+```text
+clientCounter = 0
+```
+
+---
+
+# 10. `receive()` function
+
+```solidity
+receive() external payable { }
+```
+
+This allows the contract to receive Ether directly.
+
+The `payable` keyword is important because without it, the contract cannot receive Ether through this mechanism.
+
+---
+
+# 11. `setManager()`
+
+```solidity
+function setManager(address managerAddress) public returns(string memory){
+    manager = payable(managerAddress);
+    return "";
+}
+```
+
+This function sets the manager's address.
+
+For example:
+
+```text
+managerAddress
+      ↓
+manager
+```
+
+The `payable()` conversion allows that address to be used for Ether transfers.
+
+### Important practical point
+
+As written, **any account can call `setManager()`**. There is no `onlyManager` restriction on this function.
+
+So this is fine for a classroom demonstration, but **not secure for a real bank contract**.
+
+---
+
+# 12. `joinAsClient()`
+
+```solidity
+function joinAsClient() public payable returns(string memory){
+    clients.push(
+        client_account(
+            clientCounter++,
+            msg.sender,
+            address(msg.sender).balance
+        )
+    );
+
+    return "";
+}
+```
+
+This registers a new client.
+
+The important value is:
+
+```solidity
+msg.sender
+```
+
+which represents the Ethereum address that called the function.
+
+The client information is added to the `clients` array using:
+
+```solidity
+clients.push(...)
+```
+
+### Example
+
+Suppose Alice's address is:
+
+```text
+0xABC...
+```
+
+After joining:
+
+```text
+Client ID       → 0
+Client Address  → 0xABC...
+Balance         → Alice's wallet balance at that moment
+```
+
+---
+
+# 13. `deposit()`
+
+```solidity
+function deposit() public payable onlyClients {
+    payable(address(this)).transfer(msg.value);
+}
+```
+
+This is the **deposit function**.
+
+Only registered clients can call it because of:
+
+```solidity
+onlyClients
+```
+
+The amount sent with the transaction is:
+
+```solidity
+msg.value
+```
+
+For example, if a client sends:
+
+```text
+2 ETH
+```
+
+then:
+
+```solidity
+msg.value
+```
+
+represents that 2 ETH in wei.
+
+### `address(this)`
+
+```solidity
+address(this)
+```
+
+means the address of the current smart contract.
+
+So conceptually:
+
+```text
+Client Wallet
+     |
+     | 2 ETH
+     ↓
+SimpleBank Contract
+```
+
+---
+
+# 14. `withdraw()`
+
+```solidity
+function withdraw(uint amount) public payable onlyClients {
+    payable(msg.sender).transfer(amount * 1 ether);
+}
+```
+
+This allows a registered client to withdraw Ether.
+
+For example:
+
+```text
+amount = 2
+```
+
+then:
+
+```solidity
+amount * 1 ether
+```
+
+means:
+
+```text
+2 ETH
+```
+
+The contract sends it to:
+
+```solidity
+msg.sender
+```
+
+So:
+
+```text
+SimpleBank Contract
+        |
+        | 2 ETH
+        ↓
+   Client Wallet
+```
+
+### Important issue
+
+This function does **not check whether the contract has enough balance** before transferring, although `transfer()` will fail if the contract cannot make the transfer.
+
+Also, it doesn't maintain an internal balance for each client.
+
+---
+
+# 15. `sendInterest()`
+
+```solidity
+function sendInterest() public payable onlyManager {
+    for(uint i=0; i<clients.length; i++){
+        address initialAddress = clients[i].client_address;
+
+        payable(initialAddress).transfer(1 ether);
+    }
+}
+```
+
+This function can only be called by the manager.
+
+It loops through every client:
+
+```solidity
+for(uint i=0; i<clients.length; i++)
+```
+
+and sends:
+
+```text
+1 ETH
+```
+
+to each client.
+
+For example, if there are 3 clients:
+
+```text
+Client 1 ← 1 ETH
+Client 2 ← 1 ETH
+Client 3 ← 1 ETH
+```
+
+Therefore the contract needs enough Ether to pay all clients.
+
+---
+
+# 16. `getContractBalance()`
+
+```solidity
+function getContractBalance() public view returns(uint){
+    return address(this).balance;
+}
+```
+
+This returns the Ether currently held by the smart contract.
+
+```solidity
+address(this).balance
+```
+
+means:
+
+> Give me the current Ether balance of this contract.
+
+`view` means the function only reads blockchain data and does not modify the blockchain state.
+
+---
+
+# 17. Overall working of the practical
+
+You can remember the complete flow like this:
+
+```text
+              SimpleBank
+                  |
+          ┌───────┴────────┐
+          |                |
+       Manager           Clients
+          |                |
+     setManager       joinAsClient()
+          |                |
+    sendInterest      deposit()
+                           |
+                       withdraw()
+                           
+                 getContractBalance()
+```
+
+### Example execution
+
+Suppose you deploy the contract.
+
+### Step 1 — Set manager
+
+Manager calls:
+
+```text
+setManager(managerAddress)
+```
+
+The manager address is stored.
+
+### Step 2 — Client joins
+
+Alice calls:
+
+```text
+joinAsClient()
+```
+
+Her address is added to `clients`.
+
+### Step 3 — Alice deposits
+
+Alice calls:
+
+```text
+deposit()
+```
+
+and sends, for example:
+
+```text
+5 ETH
+```
+
+The contract receives the Ether.
+
+### Step 4 — Alice withdraws
+
+Alice calls:
+
+```text
+withdraw(2)
+```
+
+The contract sends:
+
+```text
+2 ETH
+```
+
+to Alice.
+
+### Step 5 — Manager gives interest
+
+Manager calls:
+
+```text
+sendInterest()
+```
+
+Each registered client receives:
+
+```text
+1 ETH
+```
+
+### Step 6 — Check balance
+
+Anyone can call:
+
+```text
+getContractBalance()
+```
+
+to see the contract's current Ether balance.
+
+---
+
+# 18. Important Solidity keywords for viva
+
+| Keyword | Meaning |
+|---|---|
+| `contract` | Defines a smart contract |
+| `struct` | Creates a custom data structure |
+| `address` | Stores Ethereum address |
+| `payable` | Allows Ether to be received/sent |
+| `msg.sender` | Address calling the function |
+| `msg.value` | Ether sent with the transaction |
+| `require()` | Checks a condition; reverts if false |
+| `modifier` | Adds reusable conditions to functions |
+| `constructor` | Runs during contract deployment |
+| `view` | Reads data without modifying state |
+| `returns` | Specifies returned value |
+| `storage` | Persistent blockchain storage |
+| `memory` | Temporary data during function execution |
+| `transfer()` | Sends Ether |
+| `address(this)` | Address of current contract |
+
+---
+
+## 19. Very important viva questions
+
+**Q: What is a smart contract?**  
+A: A smart contract is a program deployed on a blockchain that executes predefined rules automatically.
+
+**Q: What is Solidity?**  
+A: Solidity is a programming language used to develop smart contracts for Ethereum/EVM blockchains.
+
+**Q: What is `msg.sender`?**  
+A: It gives the address of the account that called the current function.
+
+**Q: What is `msg.value`?**  
+A: It gives the amount of Ether sent with the current payable transaction, in wei.
+
+**Q: Why is `payable` used?**  
+A: It allows a function or address to receive or transfer Ether.
+
+**Q: Why do we use modifiers?**  
+A: To apply access-control or validation conditions to functions without repeating the same code.
+
+**Q: What does `onlyManager` do?**  
+A: It ensures that only the stored manager address can call the function.
+
+**Q: What does `onlyClients` do?**  
+A: It checks whether `msg.sender` is registered in the `clients` array.
+
+**Q: What does `address(this).balance` mean?**  
+A: It gives the current Ether balance of the smart contract.
+
+**Q: Why is `constructor()` used?**  
+A: It initializes contract data when the contract is deployed.
+
+**Q: What does `clients.push()` do?**  
+A: It adds a new client record to the dynamic `clients` array.
+
+---
+
+### One important correction for your practical
+
+Your comments say:
+
+> `client_balance_in_ether` keeps the client's Ether balance.
+
+But technically, this code only stores the client's **wallet balance at the moment they join**:
+
+```solidity
+address(msg.sender).balance
+```
+
+It does **not update that field** after `deposit()` or `withdraw()`.
+
+Also, `setManager()` is currently callable by anyone. For a real application, you would normally protect manager setup and maintain proper per-client balances.
+
+For a **college practical/viva**, though, the main flow to remember is:
+
+**Deploy → Set Manager → Client Joins → Deposit → Withdraw → Manager Sends Interest → Check Contract Balance.**

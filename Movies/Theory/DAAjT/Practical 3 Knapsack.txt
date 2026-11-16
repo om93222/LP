@@ -1,0 +1,126 @@
+Here is simple, exam-ready theory for your SPPU practical. You can write this in your practical journal and explain it easily to your mam.
+
+## **Experiment: Fractional Knapsack Problem Using Greedy Method**
+
+### **1. Aim**
+
+To write a Java program to solve the Fractional Knapsack Problem using the Greedy Method.
+
+### **2. Theory**
+
+The Fractional Knapsack Problem is an optimization problem in which we have a knapsack (bag) with limited capacity and a set of items, each having a weight and value.
+
+The main objective is to maximize the total value of items placed in the knapsack without exceeding its capacity.
+
+In this problem, we can take either a complete item or a fraction of an item.
+
+The Greedy Method is used to select the item that gives the maximum value per unit of weight.
+
+### **3. Algorithm**
+
+1. Start.
+2. Initialize the weight and value of each item.
+3. Calculate the value-to-weight ratio for each item.
+4. Sort all items in descending order of their ratio.
+5. Select the item with the highest ratio.
+6. If the item fits completely, add its value and reduce the remaining capacity.
+7. Otherwise, take the required fraction of the item.
+8. Calculate and display the maximum total value.
+9. Stop.
+
+### **4. Formula**
+
+Value-to-weight ratio:
+
+\\[ Ratio = \frac{Value}{Weight} \\]
+
+Fraction of an item:
+
+\\[ Fraction = \frac{Remaining\ Capacity}{Item\ Weight} \\]
+
+Total value:
+
+\\[ Maximum\ Value = \sum (Value \times Fraction) \\]
+
+### **5. Example**
+
+Knapsack capacity = 50 kg.
+
+| Item | Weight | Value | Ratio |
+| ---- | ------ | ----- | ----- |
+| 1    | 10     | 60    | 6     |
+| 2    | 20     | 100   | 5     |
+| 3    | 30     | 120   | 4     |
+
+Selection:
+
+- Item 1: Take completely = 60
+- Item 2: Take completely = 100
+- Item 3: Take 20/30 fraction = 80
+
+Maximum value = 60 + 100 + 80 = **240**
+
+### **6. Time Complexity**
+
+- Sorting: O(n²) in our program.
+- Selecting items: O(n).
+- Overall time complexity: **O(n²)**.
+
+### **7. Result**
+
+Thus, the Fractional Knapsack Problem is successfully solved using the Greedy Method, and the maximum value obtained is **240**.
+
+## **What to explain to your mam in simple words**
+
+You can say:
+
+"Ma'am, Fractional Knapsack is an optimization problem. First, we calculate the value-to-weight ratio of every item. Then we sort items according to the highest ratio. We select the highest-value items first. If an item cannot fit completely, we take only its required fraction. This is called the Greedy Method."
+
+**Important:** Remember this one line for your viva:
+
+The Greedy Method makes the best possible choice at each step to get the maximum total value.
+
+
+
+
+Top 10 oral questions with answers
+1. What is the Fractional Knapsack Problem?
+
+It is an optimization problem in which we can take complete or fractional items to maximize the total value.
+
+2. Which technique is used in this program?
+
+Greedy Method.
+
+3. What is the Greedy Method?
+
+It selects the best possible choice at each step to achieve an optimal solution.
+
+4. What is the main objective of the Knapsack Problem?
+
+To maximize the total value without exceeding the given capacity.
+
+5. What is the formula for calculating the ratio?
+\[
+Ratio = \frac{Value}{Weight}
+\]
+
+6. Why do we sort items in descending order?
+
+To select the item with the highest value-to-weight ratio first.
+
+7. What is the difference between Fractional and 0/1 Knapsack?
+
+In Fractional Knapsack, we can take partial items. In 0/1 Knapsack, we must take the complete item or leave it.
+
+8. What is the time complexity of your program?
+
+O(n²), because we use nested loops for sorting.
+
+9. What happens when an item cannot fit completely in the knapsack?
+
+We take only the required fraction of that item.
+
+10. What is the final output of your program?
+
+The maximum value is 240.

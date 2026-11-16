@@ -1,0 +1,423 @@
+# **Practical: Diabetes Prediction Using K-Nearest Neighbors (KNN)**
+
+## **1. Theory**
+
+**Aim:** To predict whether a person has diabetes or not using the K-Nearest Neighbors (KNN) classification algorithm.
+
+### **What is Diabetes Prediction?**
+
+Diabetes prediction is a machine learning task that uses medical information such as glucose level, blood pressure, BMI, insulin and age to predict whether a person has diabetes.
+
+There are two possible outputs:
+
+- **0 – Non-Diabetic:** Person does not have diabetes.
+- **1 – Diabetic:** Person has diabetes.
+
+### **What is KNN?**
+
+K-Nearest Neighbors (KNN) is a supervised machine learning algorithm used for classification and regression.
+
+It predicts the class of a new data point by checking the classes of its nearest neighboring data points.
+
+For example, if K = 5, the algorithm checks the 5 nearest records. The class that appears most often becomes the prediction.
+
+[K-Nearest Neighbors (KNN): A Simple Yet Powerful Machine Learning Algorithm | by SamriddhiRuhela | Medium](https://images.openai.com/static-rsc-4/-UxuLGqx3F4IE4CFtz2MBhNlq5tNtY98hggMQbLO19QRdY5RfG5ZJ55iRNjG9VPDm1L1vVsQ8h4BdbhUw0HJITBhjbjxl4KdrH_AzCLyTy_sVlbze_M1nYkPoaIiQwiIDfr7GZCjPPeST4Ubd1kgYHzfuWYp-unUPbJKlIq-WUQ?purpose=inline)
+
+[medium.com](https://medium.com/%40ruhelasamridhi/k-nearest-neighbors-knn-a-simple-yet-powerful-machine-learning-algorithm-c3a3bd83057a?utm_source=chatgpt.com)
+
+### **Important concepts used**
+
+1. **StandardScaler:** Scales the input features to a similar range.
+2. **Train-Test Split:** Divides the dataset into training and testing data.
+3. **GridSearchCV:** Finds the best KNN parameters automatically.
+4. **n_neighbors:** Number of nearest neighbors considered.
+5. **p:** Controls the distance calculation.
+   - p = 1: Manhattan distance.
+   - p = 2: Euclidean distance.
+6. **Confusion Matrix:** Shows correct and incorrect predictions.
+7. **Classification Report:** Displays precision, recall, F1-score and support.
+8. **Accuracy:** Measures the percentage of correct predictions.
+
+### **Working of the program**
+
+1. Import required libraries.
+2. Load the diabetes dataset.
+3. Explore the dataset.
+4. Separate input features and output.
+5. Split data into training and testing sets.
+6. Scale the data using StandardScaler.
+7. Apply GridSearchCV to find the best KNN parameters.
+8. Train the KNN model.
+9. Predict diabetes.
+10. Evaluate the model using accuracy, confusion matrix and classification report.
+
+## **2. Line-by-line code explanation**
+
+### **A. Importing libraries**
+
+```
+import pandas as pdimport numpy as npimport matplotlib.pyplot as pltimport seaborn as sns
+```
+
+- `pandas`: Used to read and handle datasets.
+- `numpy`: Used for numerical operations.
+- `matplotlib.pyplot`: Used to display graphs.
+- `seaborn`: Used for data visualization. It is imported but not used later in this code.
+
+```
+from sklearn.model_selection import train_test_split, GridSearchCV
+```
+
+- `train_test_split`: Divides data into training and testing sets.
+- `GridSearchCV`: Finds the best parameters for the KNN model.
+
+```
+from sklearn.preprocessing import StandardScaler
+```
+
+Imports StandardScaler to scale numerical data.
+
+```
+from sklearn.neighbors import KNeighborsClassifier
+```
+
+Imports the KNN classification algorithm.
+
+```
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+```
+
+Imports functions to evaluate model performance.
+
+### **B. Loading the dataset**
+
+```
+url = "https://raw.githubusercontent.com/plotly/datasets/master/diabetes.csv"
+```
+
+Stores the URL of the diabetes dataset.
+
+```
+df = pd.read_csv(url)
+```
+
+Reads the CSV dataset and stores it in `df`.
+
+```
+df.head()
+```
+
+Displays the first five rows of the dataset.
+
+```
+df.info()
+```
+
+Displays dataset information, including column names, data types and non-null values.
+
+```
+df.describe()
+```
+
+Displays statistical details such as mean, minimum, maximum and standard deviation.
+
+```
+df.isnull().sum()
+```
+
+Checks the number of missing values in each column.
+
+```
+df.isna().sum()
+```
+
+Also checks missing values. It performs almost the same task as `isnull()`.
+
+```
+df.shape
+```
+
+Displays the number of rows and columns in the dataset.
+
+You have written `df.shape` twice. One is enough.
+
+### **C. Visualizing the data**
+
+```
+df.hist(figsize=(20,16))plt.show()
+```
+
+- `df.hist()`: Creates histograms for numerical columns.
+- `figsize=(20,16)`: Sets the size of the graph.
+- `plt.show()`: Displays the graphs.
+
+A histogram shows how the values of a feature are distributed.
+
+### **D. Separating input and output**
+
+```
+x = df.iloc[:, :df.shape[1]-1]
+```
+
+Stores all columns except the last column in `x`.
+
+These are the input features, such as glucose, blood pressure, BMI and age.
+
+```
+y = df.iloc[:, -1]
+```
+
+Stores the last column in `y`.
+
+This is the output column, usually named `Outcome`:
+
+- 0 = Non-diabetic.
+- 1 = Diabetic.
+
+```
+print(x.shape, y.shape)
+```
+
+Displays the dimensions of input and output data.
+
+### **E. Splitting the dataset**
+
+```
+x_train, x_test, y_train, y_test = train_test_split(    x, y, random_state=8, test_size=0.2)
+```
+
+Divides the dataset into:
+
+- 80% training data.
+- 20% testing data.
+
+`random_state=8` ensures the same random split when the program runs again.
+
+### **F. Feature scaling**
+
+```
+scaler = StandardScaler()
+```
+
+Creates a StandardScaler object.
+
+```
+x_train = scaler.fit_transform(x_train)
+```
+
+Calculates the scaling values from training data and scales the training data.
+
+```
+x_test = scaler.transform(x_test)
+```
+
+Scales the testing data using the same values learned from training data.
+
+**Why is scaling important in KNN?**
+
+KNN uses distance to find nearby data points. If one feature has much larger values than another, it can dominate the distance calculation. Scaling helps prevent this.
+
+### **G. Creating the KNN function**
+
+```
+def knn(x_train, x_test, y_train, y_test, neighbors, power):
+```
+
+Defines a function named `knn`.
+
+It accepts:
+
+- Training input and output.
+- Testing input and output.
+- `neighbors`: Number of nearest neighbors (K).
+- `power`: Distance calculation parameter (p).
+
+```
+model = KNeighborsClassifier(n_neighbors=neighbors, p=power)
+```
+
+Creates a KNN model.
+
+- `n_neighbors`: Number of nearest neighbors.
+- `p`: Determines the distance formula.
+
+```
+y_pred = model.fit(x_train, y_train).predict(x_test)
+```
+
+This line performs two operations:
+
+1. `fit()` trains the model using training data.
+2. `predict()` predicts the output for testing data.
+
+The predictions are stored in `y_pred`.
+
+```
+print(f"Accuracy for KNN: \t{accuracy_score(y_test, y_pred)}")
+```
+
+Calculates and displays the accuracy of the model.
+
+### **H. Confusion matrix**
+
+```
+cm = confusion_matrix(y_test, y_pred)
+```
+
+Creates a confusion matrix by comparing actual results with predicted results.
+
+```
+print(f'''Confusion matrix :\n    | Positive Prediction\t| Negative Prediction    ---------------+------------------------+----------------------    Positive Class | True Positive (TP) {cm[0, 0]}\t| False Negative (FN) {cm[0, 1]}    ---------------+------------------------+----------------------    Negative Class | False Positive (FP) {cm[1, 0]}\t| True Negative (TN) {cm[1, 1]}\n''')
+```
+
+Displays the confusion matrix values.
+
+**Important correction:** Your printed labels are reversed. Scikit-learn normally arranges the matrix in the order `[0, 1]`. For this dataset, the correct interpretation is:
+
+| Actual / Predicted | 0 – Non-diabetic | 1 – Diabetic |
+| ------------------ | ---------------- | ------------ |
+| 0 – Non-diabetic   | TN               | FP           |
+| 1 – Diabetic       | FN               | TP           |
+
+So the correct mapping is:
+
+- `cm[0,0]` = True Negative (TN)
+- `cm[0,1]` = False Positive (FP)
+- `cm[1,0]` = False Negative (FN)
+- `cm[1,1]` = True Positive (TP)
+
+Your model calculations are not affected by this printing-label mistake, but the displayed explanation should be corrected.
+
+### **I. Classification report**
+
+```
+cr = classification_report(y_test, y_pred)
+```
+
+Generates a report containing precision, recall, F1-score and support.
+
+```
+print("Classification report: \n", cr)
+```
+
+Displays the classification report.
+
+### **J. Finding the best KNN parameters**
+
+```
+param_grid = {'n_neighbors': range(1, 51), 'p': range(1, 4)}
+```
+
+Creates a list of parameter values to test.
+
+- `n_neighbors`: Tests K values from 1 to 50.
+- `p`: Tests values 1, 2 and 3.
+
+```
+grid = GridSearchCV(    estimator=KNeighborsClassifier(),    param_grid=param_grid,    cv=5)
+```
+
+Creates GridSearchCV.
+
+- `estimator`: KNN algorithm.
+- `param_grid`: Parameter values to test.
+- `cv=5`: Uses 5-fold cross-validation.
+
+It tests different combinations and finds the best parameters.
+
+```
+print(grid.fit(x_train, y_train))
+```
+
+Trains and evaluates different KNN parameter combinations using training data.
+
+```
+print(grid.best_estimator_, grid.best_params_, grid.best_score_)
+```
+
+Displays:
+
+- `best_estimator_`: Best KNN model.
+- `best_params_`: Best values of K and p.
+- `best_score_`: Best average cross-validation accuracy.
+
+### **K. Final prediction and evaluation**
+
+```
+knn(    x_train, x_test, y_train, y_test,    grid.best_params_['n_neighbors'],    grid.best_params_['p'])
+```
+
+Calls the KNN function using the best parameters found by GridSearchCV.
+
+The function then trains the model, predicts diabetes for the test data and displays accuracy, confusion matrix and classification report.
+
+## **3. Important 10 oral (viva) questions with answers**
+
+**1. What is diabetes prediction?**
+
+It is the process of predicting whether a person has diabetes using medical information.
+
+**2. What is KNN?**
+
+K-Nearest Neighbors is a supervised machine learning algorithm that predicts a class based on the nearest data points.
+
+**3. Which type of machine learning is used?**
+
+Supervised learning because the dataset contains input features and known output labels.
+
+**4. Is this classification or regression?**
+
+It is a binary classification problem because the output has two classes: 0 and 1.
+
+**5. What is the meaning of K in KNN?**
+
+K represents the number of nearest neighbors considered when making a prediction.
+
+**6. What is StandardScaler?**
+
+It is a preprocessing technique that scales numerical features to a similar range.
+
+**7. What is GridSearchCV?**
+
+GridSearchCV automatically finds the best model parameters by testing different combinations using cross-validation.
+
+**8. What is the use of&#x20;**`n_neighbors`**&#x20;and&#x20;**`p`**?**
+
+- `n_neighbors` specifies how many nearest neighbors to consider.
+- `p` controls the distance calculation.
+
+**9. What is the difference between Euclidean and Manhattan distance?**
+
+- Euclidean distance measures straight-line distance.
+- Manhattan distance measures distance by adding differences along each dimension.
+
+**10. What is a confusion matrix?**
+
+It is a table used to evaluate a classification model using four values: True Positive, True Negative, False Positive and False Negative.
+
+## **4. Important points to remember**
+
+| Question             | Answer                                            |
+| -------------------- | ------------------------------------------------- |
+| Practical topic      | Diabetes Prediction                               |
+| Algorithm            | K-Nearest Neighbors (KNN)                         |
+| Learning type        | Supervised Learning                               |
+| Problem type         | Binary Classification                             |
+| Dataset              | diabetes.csv                                      |
+| Target column        | Outcome                                           |
+| Output 0             | Non-diabetic                                      |
+| Output 1             | Diabetic                                          |
+| Training data        | 80%                                               |
+| Testing data         | 20%                                               |
+| Scaling technique    | StandardScaler                                    |
+| Parameter tuning     | GridSearchCV                                      |
+| Cross-validation     | 5-fold                                            |
+| K values tested      | 1 to 50                                           |
+| Distance parameter p | 1 to 3                                            |
+| Evaluation           | Accuracy, Confusion Matrix, Classification Report |
+
+**One important sentence for your practical exam:**
+
+"My program uses the K-Nearest Neighbors algorithm to predict whether a person has diabetes or not. It uses medical features as input, finds the best K value using GridSearchCV, and evaluates the model using accuracy and a confusion matrix."
+
+*Note: This model is for educational prediction, not for diagnosing diabetes in a real person.*

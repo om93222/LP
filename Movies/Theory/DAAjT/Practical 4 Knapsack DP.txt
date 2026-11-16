@@ -1,0 +1,194 @@
+Practical 4: 0/1 Knapsack Using Dynamic Programming
+1. Aim
+To write a Java program to solve the 0/1 Knapsack Problem using Dynamic Programming.
+2. Theory
+The 0/1 Knapsack Problem is an optimization problem in which we have a bag (knapsack) with limited capacity and a set of items. Each item has a specific weight and value.
+
+The main objective is to select items to get the maximum total value without exceeding the capacity of the bag.
+
+In this problem, we have only two choices for each item:
+- 1: Select the complete item.
+- 0: Do not select the item.
+We cannot take a fraction of an item.
+
+Dynamic Programming is used to solve this problem by storing previous results in a 2D array called dp. It helps avoid repeated calculations.
+3. Algorithm
+1. Start.
+2. Initialize the weight, value and capacity of items.
+3. Create a 2D DP array.
+4. Initialize the first row and first column with zero.
+5. Check whether the current item fits in the knapsack.
+6. If it fits, find the maximum value between selecting and not selecting the item.
+7. If it does not fit, skip the item.
+8. Repeat this process for all items.
+9. Display the maximum value.
+10. Stop.
+4. Explanation of code in simple words
+Let's understand your actual Java code step by step.
+
+Step 1: Create the method
+public static int knapsack(int capacity,
+        int[] weight, int[] value, int n)
+
+
+This method takes:
+- capacity – maximum weight the bag can hold.
+- weight[] – weight of each item.
+- value[] – value of each item.
+- n – total number of items.
+Step 2: Create the DP array
+int[][] dp = new int[n + 1][capacity + 1];
+
+
+We create a 2D array to store the maximum value for different numbers of items and capacities.
+
+Step 3: Use nested loops
+for (int i = 0; i <= n; i++) {
+    for (int w = 0; w <= capacity; w++) {
+
+
+- i represents the number of items.
+- w represents the current knapsack capacity.
+These loops fill the DP table.
+
+Step 4: Initialize zero values
+if (i == 0 || w == 0) {
+    dp[i][w] = 0;
+}
+
+
+If there are no items or the capacity is zero, the maximum value will be zero.
+
+Step 5: Check whether the item fits
+else if (weight[i - 1] <= w)
+
+
+We check whether the current item's weight is less than or equal to the available capacity.
+
+Step 6: Select the maximum value
+dp[i][w] = Math.max(
+    value[i - 1] + dp[i - 1][w - weight[i - 1]],
+    dp[i - 1][w]
+);
+
+
+This is the most important part.
+
+We compare two choices:
+1. Select the item and add its value.
+2. Do not select the item and keep the previous maximum value.
+Math.max() selects whichever gives the higher value.
+
+Step 7: If the item does not fit
+else {
+    dp[i][w] = dp[i - 1][w];
+}
+
+
+If the item's weight is greater than the available capacity, we skip that item.
+
+Step 8: Return the final answer
+return dp[n][capacity];
+
+
+It returns the maximum value obtained after considering all items and the full capacity.
+5. Sample input and output
+Input:
+Item	Weight	Value
+1	10	60
+2	20	100
+3	30	120
+
+Knapsack capacity = 50.
+
+Output:
+Maximum value obtained = 220
+
+
+Explanation:
+- Select item 1: Weight = 10, Value = 60.
+- Select item 2: Weight = 20, Value = 100.
+- Select item 3: Weight = 30, Value = 120.
+The best combination is item 2 + item 3.
+
+Total weight = 20 + 30 = 50.
+
+Total value = 100 + 120 = 220.
+6. Important formulas
+When an item fits:
+\[
+dp[i][w] = \max
+\begin{cases}
+value[i-1]+dp[i-1][w-weight[i-1]]\\
+dp[i-1][w]
+\end{cases}
+\]
+
+When an item does not fit:
+\[
+dp[i][w]=dp[i-1][w]
+\]
+
+7. Time and space complexity
+Complexity	Answer
+Time complexity	O(n × W)
+Space complexity	O(n × W)
+
+Here:
+- n = number of items.
+- W = knapsack capacity.
+
+8. Top 10 important viva questions
+These are the questions I recommend preparing first.
+
+1. What is the 0/1 Knapsack Problem?
+
+It is an optimization problem where we either select the complete item or leave it.
+
+2. Which technique is used in this program?
+
+Dynamic Programming.
+
+3. What is Dynamic Programming?
+
+It is a technique that stores previous results to avoid repeated calculations.
+
+4. What does 0/1 mean?
+
+0 means the item is not selected, and 1 means the item is selected.
+
+5. Can we take half of an item?
+
+No, we must take the complete item or leave it.
+
+6. Why do we use a 2D array?
+
+To store the maximum value for different items and capacities.
+
+7. Why do we use Math.max()?
+
+To select the maximum value between including and excluding an item.
+
+8. What is the time complexity?
+
+O(n × W).
+
+9. What is the difference between 0/1 and Fractional Knapsack?
+
+In 0/1 Knapsack, we take complete items or leave them. In Fractional Knapsack, we can take partial items.
+
+10. What is the final output of your program?
+
+9. Five additional viva questions
+Question	Simple answer
+What is an optimization problem?	A problem where we find the best possible solution.
+What is a DP table?	A 2D array used to store results.
+What is Math.max()?	A Java method that returns the larger value.
+What happens when capacity is zero?	Maximum value is zero.
+Is this a Greedy Algorithm?	No, it uses Dynamic Programming.
+
+
+10. What to tell your mam during the practical
+You can explain your entire program in these simple words:
+
+"Ma'am, this program implements the 0/1 Knapsack Problem using Dynamic Programming. First, we take the weight and value of each item. Then we create a 2D DP array. We check whether each item fits in the available capacity. If it fits, we use Math.max() to compare including and excluding the item. If it does not fit, we skip it. Finally, we get the maximum value from the DP table."

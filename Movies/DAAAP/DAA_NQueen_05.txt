@@ -1,0 +1,86 @@
+
+class NQBacktracking:
+
+    def __init__(self, N, x, y):
+        self.N = N
+        self.x = x
+        self.y = y
+
+        self.ld = [0] * (2 * N)
+        self.rd = [0] * (2 * N)
+        self.cl = [0] * N
+
+    def printSolution(self, board):
+        print("N Queen Backtracking Solution:")
+        print("Initial position of 1st queen:",
+              "Row:", self.x + 1, "Column:", self.y + 1)
+        print()
+
+        for row in board:
+            print(" ".join(map(str, row)))
+
+    def solveNQUtil(self, board, col):
+
+        if col >= self.N:
+            return True
+
+        # Skip the column containing first queen
+        if col == self.y:
+            return self.solveNQUtil(board, col + 1)
+
+        for i in range(self.N):
+
+            if (self.ld[i - col + self.N - 1] == 0 and
+                self.rd[i + col] == 0 and
+                self.cl[i] == 0):
+
+                board[i][col] = 1
+
+                self.ld[i - col + self.N - 1] = 1
+                self.rd[i + col] = 1
+                self.cl[i] = 1
+
+                if self.solveNQUtil(board, col + 1):
+                    return True
+
+                # Backtracking
+                board[i][col] = 0
+                self.ld[i - col + self.N - 1] = 0
+                self.rd[i + col] = 0
+                self.cl[i] = 0
+
+        return False
+
+    def solveNQ(self):
+
+        if not (0 <= self.x < self.N and
+                0 <= self.y < self.N):
+            print("Invalid initial position")
+            return False
+
+        board = [[0 for _ in range(self.N)]
+                 for _ in range(self.N)]
+
+        board[self.x][self.y] = 1
+
+        self.ld[self.x - self.y + self.N - 1] = 1
+        self.rd[self.x + self.y] = 1
+        self.cl[self.x] = 1
+
+        if not self.solveNQUtil(board, 0):
+            print("Solution does not exist")
+            return False
+
+        self.printSolution(board)
+        return True
+
+
+if __name__ == "__main__":
+
+    N = 4
+
+    # Initial position of first queen (0-based indexing)
+    x, y = 0, 2
+
+    NQBt = NQBacktracking(N, x, y)
+    NQBt.solveNQ()

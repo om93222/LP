@@ -1,0 +1,52 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import LinearSVC, SVC
+from sklearn import metrics
+from sklearn.feature_extraction.text import CountVectorizer
+
+
+url = "https://raw.githubusercontent.com/justmarkham/pycon-2016-tutorial/master/data/sms.tsv"
+raw = pd.read_csv(url, sep="\t", header=None, names=["label", "message"])
+# turn text into word-count columns (like emails.csv)
+vec = CountVectorizer(max_features=3000)
+counts = vec.fit_transform(raw["message"]).toarray()
+df = pd.DataFrame(counts, columns=vec.get_feature_names_out())
+df.insert(0, "Email No.", [f"Email {i+1}" for i in range(len(df))])
+df["Prediction"] = (raw["label"] == "spam").astype(int)   # 1 = spam, 0 = ham
+
+
+df.head()
+
+df.drop(columns=['Email No.'], inplace=True)
+
+df.info()
+
+df.describe()
+
+df.isnull().sum()
+
+
+X = df.iloc[:, :df.shape[1]-1]
+print(X.shape)
+y = df.iloc[:, -1]
+print(y.shape)
+
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=8)
+
+
+models = {
+    "K-Nearest Neighbour: ": KNeighborsClassifier(n_neighbors=2),
+    "Linear SVM: ": LinearSVC(random_state=8, max_iter=900000),
+    "Polynomical SVM: ": SVC(kernel="poly", degree=2, random_state=8)
+}
+
+
+for model_name, model in models.items():
+    y_pred = model.fit(X_train, y_train).predict(X_test)
+    print(f"Accuracy for {model_name} model \t:{metrics.accuracy_score(y_test, y_pred)}")

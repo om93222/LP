@@ -1,0 +1,137 @@
+
+import java.util.*;
+
+class Item1 {
+    int weight;
+    int value;
+
+    public Item1(int weight, int value) {
+        this.weight = weight;
+        this.value = value;
+    }
+}
+
+class Node1 {
+    int level;
+    int weight;
+    int value;
+    double bound;
+
+    public Node1(int level, int weight, int value, double bound) {
+        this.level = level;
+        this.weight = weight;
+        this.value = value;
+        this.bound = bound;
+    }
+}
+
+public class A4_BranchnBound {
+
+    public static int knapsack(int capacity, Item1[] items) {
+
+        int n = items.length;
+
+        Arrays.sort(items, (a, b) -> Double.compare(
+                (double) b.value / b.weight,
+                (double) a.value / a.weight));
+
+        Queue<Node1> priorityQueue = new PriorityQueue<>((a, b) -> Double.compare(b.bound, a.bound));
+
+        Node1 root = new Node1(-1, 0, 0, 0);
+        root.bound = calculateBound(root, n, items, capacity);
+
+        priorityQueue.offer(root);
+
+        int maxValue = 0;
+
+        while (!priorityQueue.isEmpty()) {
+
+            Node1 current = priorityQueue.poll();
+
+            if (current.bound <= maxValue) {
+                continue;
+            }
+
+            int level = current.level + 1;
+
+            if (level >= n) {
+                continue;
+            }
+
+            // Include current item
+            int weight = current.weight + items[level].weight;
+            int value = current.value + items[level].value;
+
+            if (weight <= capacity && value > maxValue) {
+                maxValue = value;
+            }
+
+            if (weight <= capacity) {
+
+                Node1 includeNode = new Node1(level, weight, value, 0);
+
+                includeNode.bound = calculateBound(includeNode, n, items, capacity);
+
+                if (includeNode.bound > maxValue) {
+                    priorityQueue.offer(includeNode);
+                }
+            }
+
+            // Exclude current item
+            Node1 excludeNode = new Node1(level, current.weight, current.value, 0);
+
+            excludeNode.bound = calculateBound(excludeNode, n, items, capacity);
+
+            if (excludeNode.bound > maxValue) {
+                priorityQueue.offer(excludeNode);
+            }
+        }
+
+        return maxValue;
+    }
+
+    private static double calculateBound(
+            Node1 node, int n, Item1[] items, int capacity) {
+
+        if (node.weight > capacity) {
+            return 0;
+        }
+
+        double bound = node.value;
+        int totalWeight = node.weight;
+        int level = node.level + 1;
+
+        while (level < n &&
+                totalWeight + items[level].weight <= capacity) {
+
+            totalWeight += items[level].weight;
+            bound += items[level].value;
+            level++;
+        }
+
+        if (level < n) {
+
+            int remainingCapacity = capacity - totalWeight;
+
+            bound += remainingCapacity *
+                    (double) items[level].value / items[level].weight;
+        }
+
+        return bound;
+    }
+
+    public static void main(String[] args) {
+
+        int capacity = 50;
+
+        Item1[] items = {
+                new Item1(10, 60),
+                new Item1(20, 100),
+                new Item1(30, 120)
+        };
+
+        int maxValue = knapsack(capacity, items);
+
+        System.out.println("Maximum value obtained = " + maxValue);
+    }
+}

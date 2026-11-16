@@ -1,0 +1,313 @@
+Part 1: Theory
+1. What is the aim of this practical?
+Aim: To predict the fare amount of an Uber ride based on pickup and drop-off locations using Machine Learning algorithms.
+2. What is Uber fare prediction?
+Uber fare prediction is a Machine Learning application that predicts the cost of a ride based on different factors, such as:
+- Pickup location
+- Drop-off location
+- Number of passengers
+- Pickup time
+- Distance between locations
+For this practical, we use a dataset containing previous Uber rides to train our Machine Learning model.
+3. Which type of Machine Learning is used?
+Supervised Machine Learning – Regression
+
+Why?
+- Supervised learning means the model is trained using data that already contains the correct answers.
+- Regression means predicting a numerical value.
+- Here, we predict the fare amount, which is a numerical value.
+4. Algorithms used
+1. Linear Regression
+
+It predicts the fare by finding a linear relationship between input features and the fare amount.
+
+2. Random Forest Regression
+
+It uses multiple decision trees and combines their predictions to produce the final result.
+5. What is RMSE?
+RMSE stands for Root Mean Square Error.
+
+It measures the difference between actual fares and predicted fares.
+- Lower RMSE = Better prediction.
+- Higher RMSE = Less accurate prediction.
+
+Part 2: Explanation of your code line by line
+Step 1: Importing libraries
+Your code:
+import pandas as pdimport numpy as npimport matplotlib.pyplot as pltfrom sklearn.model_selection import train_test_splitfrom sklearn.linear_model import LinearRegressionfrom sklearn.metrics import mean_squared_errorfrom sklearn.ensemble import RandomForestRegressor
+
+
+
+Explanation:
+Code	Meaning
+import pandas as pd	Used to handle and manipulate datasets.
+import numpy as np	Used for mathematical calculations.
+import matplotlib.pyplot as plt	Used to create graphs and charts.
+train_test_split	Divides data into training and testing sets.
+LinearRegression	Imports the Linear Regression algorithm.
+mean_squared_error	Calculates prediction error.
+RandomForestRegressor	Imports the Random Forest algorithm.
+
+Oral question: Why do we use Pandas?
+
+Answer: Pandas is used to read, manipulate and analyze datasets.
+Step 2: Loading the dataset
+Your code:
+url = "https://raw.githubusercontent.com/unnatibisht/Uber-Fare-Prediction/main/uber.csv"df = pd.read_csv(url)df.head()
+
+
+
+Explanation:
+- url stores the location of the Uber dataset.
+- pd.read_csv(url) reads the CSV file.
+- df stores the dataset in DataFrame format.
+- df.head() displays the first five rows.
+Remember:
+
+A DataFrame is a two-dimensional table containing rows and columns.
+Step 3: Understanding the dataset
+Your code:
+df.info()print(df['pickup_datetime'].dtype)df.describe()df.isnull().sum()
+
+
+
+Explanation:
+Code	Purpose
+df.info()	Displays column names, data types and non-null values.
+dtype	Displays the data type of a column.
+df.describe()	Displays statistical information such as mean, minimum, maximum and standard deviation.
+df.isnull().sum()	Counts missing values in each column.
+
+Oral question: What is a missing value?
+
+Answer: A missing value is a value that is not available or is empty in a dataset.
+Step 4: Converting date and time
+Your code:
+df['pickup_datetime'] = pd.to_datetime(    df['pickup_datetime'],    errors='coerce',    utc=True)print(df['pickup_datetime'].dtype)
+
+
+
+Explanation:
+- pd.to_datetime() converts the pickup date into datetime format.
+- errors='coerce' converts invalid dates into NaT (Not a Time).
+- utc=True converts the datetime values to UTC timezone.
+- dtype checks the updated data type.
+Why do we do this?
+
+Because we want to extract information such as hour, day and month from the pickup date.
+Step 5: Removing missing values
+Your code:
+df.dropna(inplace=True)df.isnull().sum()
+
+
+
+Explanation:
+- dropna() removes rows containing missing values.
+- inplace=True applies the changes directly to the original DataFrame.
+- df.isnull().sum() checks whether missing values remain.
+Oral question: Why do we remove missing values?
+
+Answer: Missing values can affect the accuracy of our Machine Learning model.
+Step 6: Finding outliers
+Your code:
+q_low = df['fare_amount'].quantile(0.01)q_hi = df['fare_amount'].quantile(0.99)print(q_low, q_hi)
+
+
+
+Explanation:
+- quantile(0.01) calculates the 1st percentile.
+- quantile(0.99) calculates the 99th percentile.
+- These values help identify unusually low and high fares.
+An outlier is a value that is unusually different from most other values in a dataset.
+Step 7: Visualizing outliers
+Your code:
+plt.boxplot(df['fare_amount'])plt.title("Fare Amount Before Removing Outliers")plt.ylabel("Fare Amount")plt.show()
+
+
+
+Explanation:
+- boxplot() creates a box plot.
+- title() gives the graph a title.
+- ylabel() gives the Y-axis a name.
+- show() displays the graph.
+A box plot helps identify outliers in the dataset.
+Step 8: Removing outliers
+Your code:
+df = df[    (df['fare_amount'] < q_hi) &    (df['fare_amount'] > q_low)]
+
+
+
+Explanation:
+
+This code removes fares that are outside the 1st and 99th percentile limits.
+- < q_hi keeps fares below the upper limit.
+- > q_low keeps fares above the lower limit.
+- & means AND.
+This helps remove extremely low and high fare values.
+Step 9: Checking outliers again
+Your code:
+plt.boxplot(df['fare_amount'])plt.title("Fare Amount After Removing Outliers")plt.ylabel("Fare Amount")plt.show()df.shape
+
+
+
+Explanation:
+- The box plot displays the fare distribution after removing outliers.
+- df.shape displays the number of rows and columns in the dataset.
+Step 10: Removing unnecessary columns
+Your code:
+df = df.drop(    columns=['key', 'Unnamed: 0'],    errors='ignore')df.head()
+
+
+
+Explanation:
+- drop() removes unnecessary columns.
+- key is an identifier for the ride.
+- Unnamed: 0 is an unnecessary index column.
+- errors='ignore' prevents an error if a specified column does not exist.
+Step 11: Extracting date features
+Your code:
+df['hour'] = df['pickup_datetime'].dt.hourdf['day'] = df['pickup_datetime'].dt.daydf['month'] = df['pickup_datetime'].dt.monthdf.head()
+
+
+
+Explanation:
+
+We extract three features from pickup datetime:
+Feature	Meaning
+hour	Hour of the ride
+day	Day of the month
+month	Month of the year
+
+For example, if a ride happens on 16 November at 10 AM:
+- Hour = 10
+- Day = 16
+- Month = 11
+These features help the model understand time-related patterns.
+Step 12: Removing original datetime column
+Your code:
+df.drop('pickup_datetime', axis=1, inplace=True)
+
+
+
+Explanation:
+- Removes the original datetime column.
+- axis=1 means we are removing a column.
+- inplace=True modifies the original dataset.
+We already extracted hour, day and month, so we no longer need the original datetime column.
+Step 13: Separating input and output
+Your code:
+x = df.drop('fare_amount', axis=1)y = df['fare_amount']
+
+
+
+Explanation:
+
+This is one of the most important steps.
+- X contains input features (independent variables).
+- Y contains the output we want to predict (dependent variable).
+In our practical:
+
+X contains:
+- Pickup latitude
+- Pickup longitude
+- Drop-off latitude
+- Drop-off longitude
+- Passenger count
+- Hour, day and month
+Y contains:
+
+- Fare amount
+
+The model learns from X to predict Y.
+Step 14: Checking data shape
+Your code:
+print(x.shape)print(y.shape)x.head()print(x.dtypes)
+
+
+
+Explanation:
+- x.shape displays the dimensions of input data.
+- y.shape displays the dimensions of output data.
+- x.head() displays the first five input records.
+- x.dtypes displays the data types of input columns.
+Step 15: Selecting numerical columns
+Your code:
+x = x.select_dtypes(include=np.number)x.shape
+
+
+
+Explanation:
+- select_dtypes() selects columns based on their data types.
+- include=np.number selects only numerical columns.
+- x.shape checks the updated dimensions.
+Machine Learning algorithms such as the ones used here require numerical input features.
+Step 16: Splitting the dataset
+Your code:
+x_train, x_test, y_train, y_test = train_test_split(    x,    y,    test_size=0.2,    random_state=1)
+
+
+
+Explanation:
+
+We divide the dataset into two parts.
+Dataset splitting
+80% Training data
+80%
+
+
+
+20% Testing data
+20%
+
+
+
+
+- x_train: Input data used for training.
+- x_test: Input data used for testing.
+- y_train: Actual fare values used for training.
+- y_test: Actual fare values used for testing.
+- test_size=0.2: Uses 20% of data for testing.
+- random_state=1: Keeps the split reproducible.
+Oral question: Why do we split the dataset?
+
+Answer: To train the model on one part of the data and evaluate its performance on unseen data.
+Step 17: Linear Regression model
+Your code:
+lrmodel = LinearRegression()lrmodel.fit(x_train, y_train)predict = lrmodel.predict(x_test)lrmodelrmse = np.sqrt(    mean_squared_error(y_test, predict))print("RMSE error for the model is:", lrmodelrmse)
+
+
+
+Explanation:
+1. LinearRegression() creates a Linear Regression model.
+2. fit() trains the model using training data.
+3. predict() predicts fare values using testing input.
+4. mean_squared_error() calculates the mean squared error.
+5. np.sqrt() calculates the square root to obtain RMSE.
+6. print() displays the RMSE value.
+Step 18: Random Forest Regression
+Your code:
+rfrmodel = RandomForestRegressor(    n_estimators=20,    max_depth=10,    random_state=101,    n_jobs=-1)rfrmodel.fit(x_train, y_train)rfrmodel_pred = rfrmodel.predict(x_test)rfrmodel_rmse = np.sqrt(    mean_squared_error(y_test, rfrmodel_pred))print("RMSE value for Random Forest is:", rfrmodel_rmse)
+
+
+
+Explanation:
+- RandomForestRegressor() creates a Random Forest model.
+- n_estimators=20 means the model uses 20 decision trees.
+- max_depth=10 limits the maximum depth of each tree.
+- random_state=101 makes results reproducible.
+- n_jobs=-1 uses all available CPU cores.
+- fit() trains the model.
+- predict() predicts fare values.
+- RMSE calculates the prediction error.
+Step 19: Comparing both models
+Your code:
+print("Linear Regression RMSE:", lrmodelrmse)print("Random Forest RMSE:", rfrmodel_rmse)if lrmodelrmse < rfrmodel_rmse:    print("Linear Regression performs better")else:    print("Random Forest performs better")
+
+
+
+Explanation:
+
+This code compares the RMSE values of both algorithms.
+- If Linear Regression has lower RMSE, it performs better.
+- Otherwise, Random Forest performs better.
+The model with the lowest RMSE is considered better on this test dataset.

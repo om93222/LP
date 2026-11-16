@@ -1,0 +1,202 @@
+Practical 2: Huffman Encoding Using Greedy Strategy
+Let's understand this practical in simple language so you can explain it confidently to your teacher during your college practical and viva.
+1. Aim
+To write a Java program to implement Huffman Encoding using a Greedy Strategy.
+2. Theory
+What is Huffman Encoding?
+
+Huffman Encoding is a data compression technique used to reduce the size of data.
+
+It assigns:
+- Short binary codes (0 and 1) to characters that occur more frequently.
+- Longer binary codes to characters that occur less frequently.
+Example:
+
+Suppose the input is:
+
+huffman
+
+The character frequencies are:
+Character	Frequency
+h	1
+u	1
+f	2
+m	1
+a	1
+n	1
+
+Huffman Encoding creates a binary tree based on these frequencies and generates a unique binary code for each character.
+3. What is Greedy Strategy?
+Greedy Strategy is an algorithmic approach in which we select the best available option at each step.
+
+In Huffman Encoding:
+- We select the two characters or nodes having the lowest frequencies.
+- Combine them into a new node.
+- Repeat this process until only one node remains.
+That final node becomes the root of the Huffman Tree.
+4. How does your program work?
+Your Java program performs these 5 main steps:
+1. Count character frequency
+   
+   The program counts how many times each character appears in the input string.
+   freq.put(c, freq.getOrDefault(c, 0) + 1);
+   
+   
+   For example, f appears 2 times in huffman.
+2. Create Priority Queue
+   PriorityQueue<Node> pq =
+       new PriorityQueue<>((a, b) -> a.freq - b.freq);
+   
+   
+   A Priority Queue stores nodes in increasing order of frequency. The node with the lowest frequency comes first.
+3. Build Huffman Tree
+   Node a = pq.poll();
+   Node b = pq.poll();
+   
+   pq.add(new Node('-', a.freq + b.freq, a, b));
+   
+   
+   - Remove the two nodes with the lowest frequencies.
+   - Add their frequencies.
+   - Create a new parent node.
+   - Repeat until only one node remains.
+4. Generate Huffman Codes
+   getCodes(root.left, code + "0", codes);
+   getCodes(root.right, code + "1", codes);
+   
+   
+   - Moving left adds 0.
+   - Moving right adds 1.
+   - Each leaf node gets its unique binary code.
+5. Encode the text
+   encoded += codes.get(c);
+   
+   
+   The program replaces every character with its corresponding Huffman binary code and prints the encoded text.
+5. Important terms used in your code
+Term	Simple meaning
+Node	Stores character and frequency
+Frequency	Number of times a character appears
+PriorityQueue	Gives the lowest-frequency node first
+Huffman Tree	Binary tree used to generate codes
+Leaf Node	Node containing a character
+Greedy Strategy	Select the two lowest frequencies
+Encoding	Converting characters into binary codes
+
+6. Expected output
+Your input is:
+String text = "huffman";
+
+
+The output will look something like:
+Huffman Codes: {a=..., f=..., h=..., m=..., n=..., u=...}
+Encoded Text: ...
+
+
+Important: The exact binary codes can differ because multiple valid Huffman trees are possible when frequencies are equal. Your program can still produce a correct Huffman encoding.
+
+7. Conclusion
+Thus, we successfully implemented Huffman Encoding using the Greedy Strategy in Java to generate binary codes based on character frequencies and encode the given text.
+
+8. Possible Oral Questions (Viva)
+These are the questions your teacher may ask.
+Basic Questions
+1. What is Huffman Encoding?
+
+Huffman Encoding is a lossless data compression technique that assigns binary codes to characters based on their frequency.
+
+2. What is data compression?
+
+Data compression means reducing the size of data to save storage space and transmission time.
+
+3. What is lossless compression?
+
+Lossless compression means compressing data without losing the original information.
+
+4. What is Greedy Strategy?
+
+Greedy Strategy selects the best available option at each step to achieve an optimal solution.
+
+5. Why do we use Greedy Strategy in Huffman Encoding?
+
+Because we repeatedly select the two nodes having the lowest frequencies and combine them.
+
+6. What is a Huffman Tree?
+
+A binary tree used to generate binary codes for characters.
+Algorithm Questions
+7. What is the first step in Huffman Encoding?
+
+Counting the frequency of each character.
+
+8. Why do we use a Priority Queue?
+
+To quickly get the two nodes having the lowest frequencies.
+
+9. What is the use of poll()?
+
+It removes and returns the highest-priority element, which in our program is the node with the lowest frequency.
+
+10. What is the use of getOrDefault()?
+
+It returns the existing value of a key or a default value if the key does not exist.
+
+11. Why do we assign 0 to the left node and 1 to the right node?
+
+To generate binary codes while traversing the Huffman Tree. The choice can also be reversed.
+
+12. What is a leaf node?
+
+A node that has no left or right child.
+
+13. What is the root node?
+
+The topmost node of a tree. In Huffman Encoding, it contains the total frequency of all characters.
+Java Programming Questions
+14. What is a HashMap?
+
+HashMap stores data in key-value pairs.
+
+15. What is a PriorityQueue?
+
+It is a Java collection that processes elements according to their priority.
+
+16. What is the use of toCharArray()?
+
+It converts a string into a character array.
+
+17. What is recursion in your program?
+
+The getCodes() method calls itself to traverse the left and right sides of the tree.
+
+18. Why is '-' used in the new parent node?
+
+It is used as a placeholder because an internal node does not represent an actual character.
+Important Conceptual Questions
+19. What is the main advantage of Huffman Encoding?
+
+It reduces the number of bits required to store data.
+
+20. Are Huffman codes fixed-length or variable-length?
+
+Variable-length codes.
+
+21. Which characters get shorter codes?
+
+Characters with higher frequencies.
+
+22. Which characters get longer codes?
+
+Characters with lower frequencies.
+
+23. What is the time complexity of Huffman Encoding?
+
+O(n log n), where n is the number of distinct characters.
+
+24. What is a prefix-free code?
+
+A code in which no character's code is the prefix of another character's code. This makes decoding unambiguous.
+
+25. Can Huffman Encoding decode the original text?
+
+Yes. The encoded binary data can be decoded using the Huffman Tree.

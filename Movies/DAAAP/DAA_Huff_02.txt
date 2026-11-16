@@ -1,0 +1,65 @@
+
+import heapq
+
+# Node class
+class Node:
+    def __init__(self, char, freq):
+        self.char = char
+        self.freq = freq
+        self.left = None
+        self.right = None
+
+    def __lt__(self, other):
+        return self.freq < other.freq
+
+
+# Generate Huffman Codes
+def generate_codes(root, code, huffman_codes):
+    if root is None:
+        return
+
+    if root.char is not None:
+        huffman_codes[root.char] = code
+        return
+
+    generate_codes(root.left, code + "0", huffman_codes)
+    generate_codes(root.right, code + "1", huffman_codes)
+
+
+# Huffman Encoding
+def huffman_encoding(chars, freq):
+    heap = []
+
+    # Create leaf nodes
+    for char, frequency in zip(chars, freq):
+        heapq.heappush(heap, Node(char, frequency))
+
+    # Build Huffman Tree using Greedy Strategy
+    while len(heap) > 1:
+        left = heapq.heappop(heap)
+        right = heapq.heappop(heap)
+
+        new_node = Node(None, left.freq + right.freq)
+        new_node.left = left
+        new_node.right = right
+
+        heapq.heappush(heap, new_node)
+
+    root = heap[0]
+
+    huffman_codes = {}
+    generate_codes(root, "", huffman_codes)
+
+    return huffman_codes
+
+
+# Main Program
+chars = ['a', 'b', 'c', 'd', 'e', 'f']
+freq = [5, 9, 12, 13, 16, 45]
+
+codes = huffman_encoding(chars, freq)
+
+print("Character\tFrequency\tHuffman Code")
+
+for char, frequency in zip(chars, freq):
+    print(f"{char}\t\t{frequency}\t\t{codes[char]}")

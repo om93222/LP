@@ -1,0 +1,464 @@
+# **ML Practical No. 2 – SMS Spam Detection**
+
+Practical journal + viva preparation
+
+**Practical Question:** Classify SMS messages as Spam or Ham using Machine Learning algorithms.
+
+I'll explain the theory and your complete original code in simple English, step by step, so you can understand it and explain it to your examiner.
+
+# **Part 1: Theory**
+
+## **1. Aim**
+
+To implement SMS Spam Detection using Machine Learning algorithms and classify messages as Spam or Ham.
+
+## **2. Introduction**
+
+SMS Spam Detection is a Machine Learning application used to identify unwanted or fraudulent messages.
+
+It classifies SMS messages into two categories:
+
+- **Spam:** Unwanted messages, advertisements, fake offers or suspicious messages.
+- **Ham:** Normal and genuine messages.
+
+For example:
+
+| SMS message                                    | Category |
+| ---------------------------------------------- | -------- |
+| Congratulations! You won a lottery. Claim now! | Spam     |
+| Hello, how are you?                            | Ham      |
+| Win a free iPhone. Click here!                 | Spam     |
+| I will meet you tomorrow.                      | Ham      |
+
+## **3. Type of Machine Learning**
+
+We use **Supervised Machine Learning – Classification**.
+
+Why?
+
+- Supervised learning uses labelled data for training.
+- Classification predicts categories or classes.
+- Here, the two classes are Spam and Ham.
+
+## **4. Algorithms used**
+
+**1. K-Nearest Neighbors (KNN)**
+
+KNN classifies a message based on the nearest similar data points.
+
+**2. Linear Support Vector Machine (Linear SVM)**
+
+Linear SVM separates Spam and Ham messages using a linear decision boundary.
+
+**3. Polynomial Support Vector Machine (Polynomial SVM)**
+
+Polynomial SVM uses a polynomial decision boundary to classify messages.
+
+## **5. What is CountVectorizer?**
+
+CountVectorizer converts text messages into numerical values based on the frequency of words.
+
+Machine Learning algorithms cannot directly understand normal text, so we convert text into numbers.
+
+For example:
+
+- Message 1: "I love Python"
+- Message 2: "I love Java"
+
+Vocabulary: `I, love, Python, Java`
+
+| Message   | I | love | Python | Java |
+| --------- | - | ---- | ------ | ---- |
+| Message 1 | 1 | 1    | 1      | 0    |
+| Message 2 | 1 | 1    | 0      | 1    |
+
+This is called a Bag of Words representation.
+
+## **6. What is Accuracy?**
+
+Accuracy measures how many predictions are correct compared to the total predictions.
+
+\\[ Accuracy = \frac{Correct\ Predictions}{Total\ Predictions}\times100 \\]
+
+Higher accuracy generally indicates better classification performance.
+
+# **Part 2: Explanation of each line of code**
+
+## **Step 1: Importing libraries**
+
+Your code:
+
+```
+import pandas as pdimport numpy as npimport seaborn as snsimport matplotlib.pyplot as pltfrom sklearn.model_selection import train_test_splitfrom sklearn.neighbors import KNeighborsClassifierfrom sklearn.svm import LinearSVC, SVCfrom sklearn import metricsfrom sklearn.feature_extraction.text import CountVectorizer
+```
+
+**Explanation:**
+
+| Code                              | Simple meaning                               |
+| --------------------------------- | -------------------------------------------- |
+| `import pandas as pd`             | Used to read and manage datasets.            |
+| `import numpy as np`              | Used for mathematical calculations.          |
+| `import seaborn as sns`           | Used to create statistical graphs.           |
+| `import matplotlib.pyplot as plt` | Used to display graphs.                      |
+| `train_test_split`                | Divides data into training and testing sets. |
+| `KNeighborsClassifier`            | Imports the KNN classification algorithm.    |
+| `LinearSVC`                       | Imports Linear Support Vector Machine.       |
+| `SVC`                             | Imports Support Vector Classification.       |
+| `metrics`                         | Used to evaluate model performance.          |
+| `CountVectorizer`                 | Converts text into numerical word counts.    |
+
+Note: Seaborn, NumPy and Matplotlib are imported in your code but are not actually used later.
+
+## **Step 2: Loading the dataset**
+
+Your code:
+
+```
+url = "https://raw.githubusercontent.com/justmarkham/pycon-2016-tutorial/master/data/sms.tsv"raw = pd.read_csv(    url,    sep="\t",    header=None,    names=["label", "message"])
+```
+
+**Explanation:**
+
+- `url` stores the online location of the SMS dataset.
+- `pd.read_csv()` reads the dataset.
+- `sep="\t"` means the data is separated by tabs.
+- `header=None` means the original dataset does not have column headings.
+- `names=["label", "message"]` assigns two column names.
+
+The dataset contains:
+
+1. `label` – Spam or Ham.
+2. `message` – Actual SMS text.
+
+## **Step 3: Converting text into numerical data**
+
+Your code:
+
+```
+vec = CountVectorizer(max_features=3000)counts = vec.fit_transform(    raw["message"]).toarray()
+```
+
+**Explanation:**
+
+- `CountVectorizer()` converts text into numerical word counts.
+- `max_features=3000` selects a maximum of 3000 words as features.
+- `raw["message"]` selects the SMS message column.
+- `fit_transform()` learns the vocabulary and converts messages into numerical values.
+- `toarray()` converts the result into a NumPy array.
+
+**Why do we use this?**
+
+Because Machine Learning algorithms work with numerical data, not directly with normal text.
+
+## **Step 4: Creating a DataFrame**
+
+Your code:
+
+```
+df = pd.DataFrame(    counts,    columns=vec.get_feature_names_out())
+```
+
+**Explanation:**
+
+- `pd.DataFrame()` converts the numerical array into a table.
+- `counts` contains word-count values.
+- `get_feature_names_out()` returns the names of extracted words.
+- Each word becomes a separate column.
+
+For example, columns may contain words such as `hello`, `free`, `call`, `win`, etc.
+
+## **Step 5: Adding Email numbers**
+
+Your code:
+
+```
+df.insert(    0,    "Email No.",    [f"Email {i+1}" for i in range(len(df))])
+```
+
+**Explanation:**
+
+- `insert()` adds a new column.
+- `0` means the first position.
+- `"Email No."` is the column name.
+- `range(len(df))` generates numbers for all rows.
+- `f"Email {i+1}"` creates labels such as Email 1, Email 2, Email 3.
+
+This column is only used as an identifier and is removed later.
+
+## **Step 6: Creating the prediction column**
+
+Your code:
+
+```
+df["Prediction"] = (    raw["label"] == "spam").astype(int)
+```
+
+**Explanation:**
+
+This converts Spam and Ham labels into numerical values.
+
+- If the label is `spam`, it returns True.
+- If the label is `ham`, it returns False.
+- `.astype(int)` converts True into 1 and False into 0.
+
+**Label conversion**
+
+Spam
+
+1
+
+Ham
+
+0
+
+## **Step 7: Displaying the dataset**
+
+Your code:
+
+```
+df.head()
+```
+
+**Explanation:**
+
+Displays the first five rows of the dataset.
+
+It helps us check whether the data has been created correctly.
+
+## **Step 8: Removing unnecessary column**
+
+Your code:
+
+```
+df.drop(    columns=['Email No.'],    inplace=True)
+```
+
+**Explanation:**
+
+- `drop()` removes a column.
+- `columns=['Email No.']` specifies which column to remove.
+- `inplace=True` modifies the original DataFrame.
+
+We remove this column because it does not help in predicting Spam or Ham.
+
+## **Step 9: Understanding the dataset**
+
+Your code:
+
+```
+df.info()df.describe()df.isnull().sum()
+```
+
+**Explanation:**
+
+| Code                | Meaning                                                   |
+| ------------------- | --------------------------------------------------------- |
+| `df.info()`         | Displays column names, data types and non-null values.    |
+| `df.describe()`     | Displays statistical information about numerical columns. |
+| `df.isnull().sum()` | Counts missing values in each column.                     |
+
+## **Step 10: Separating input and output**
+
+Your code:
+
+```
+X = df.iloc[:, :df.shape[1]-1]print(X.shape)y = df.iloc[:, -1]print(y.shape)
+```
+
+**Explanation:**
+
+This is an important step in Machine Learning.
+
+**X – Input features**
+
+Contains the numerical word-count columns.
+
+**y – Target variable**
+
+Contains the Prediction column (Spam = 1, Ham = 0).
+
+Understanding the code:
+
+- `iloc[]` selects rows and columns by their positions.
+- `:` means select all rows.
+- `df.shape[1]` gives the total number of columns.
+- `df.shape[1]-1` excludes the last column.
+- `-1` selects the last column.
+
+Therefore, X contains all word-count features and y contains the output labels.
+
+## **Step 11: Splitting training and testing data**
+
+Your code:
+
+```
+X_train, X_test, y_train, y_test = train_test_split(    X,    y,    test_size=0.15,    random_state=8)
+```
+
+**Explanation:**
+
+This divides the dataset into training and testing parts.
+
+**Dataset splitting**
+
+**Training data**
+
+# **85%**
+
+**Testing data**
+
+# **15%**
+
+- `X_train`: Input data for training.
+- `X_test`: Input data for testing.
+- `y_train`: Actual labels for training.
+- `y_test`: Actual labels for testing.
+- `test_size=0.15`: Uses 15% data for testing.
+- `random_state=8`: Makes the data split reproducible.
+
+## **Step 12: Creating Machine Learning models**
+
+Your code:
+
+```
+models = {    "K-Nearest Neighbour: ": KNeighborsClassifier(n_neighbors=2),    "Linear SVM: ": LinearSVC(        random_state=8,        max_iter=900000    ),    "Polynomical SVM: ": SVC(        kernel="poly",        degree=2,        random_state=8    )}
+```
+
+**Explanation:**
+
+Here, we create three Machine Learning classification models.
+
+**1. K-Nearest Neighbors**
+
+```
+KNeighborsClassifier(n_neighbors=2)
+```
+
+- Creates a KNN classification model.
+- `n_neighbors=2` means it considers the two nearest neighboring data points to classify a message.
+
+**2. Linear SVM**
+
+```
+LinearSVC(random_state=8, max_iter=900000)
+```
+
+- Creates a Linear Support Vector Machine model.
+- `random_state=8` helps make results reproducible.
+- `max_iter=900000` sets the maximum number of training iterations.
+
+**3. Polynomial SVM**
+
+```
+SVC(kernel="poly", degree=2, random_state=8)
+```
+
+- Creates a Polynomial SVM model.
+- `kernel="poly"` specifies a polynomial kernel.
+- `degree=2` means a polynomial of degree 2.
+- `random_state=8` helps make results reproducible.
+
+## **Step 13: Training and testing all models**
+
+Your code:
+
+```
+for model_name, model in models.items():    y_pred = model.fit(        X_train, y_train    ).predict(X_test)    print(        f"Accuracy for {model_name} model:",        metrics.accuracy_score(y_test, y_pred)    )
+```
+
+**Explanation:**
+
+This loop trains and tests all three models one by one.
+
+Let's understand each line:
+
+**1. For loop**
+
+```
+for model_name, model in models.items():
+```
+
+It takes each model from the dictionary one by one.
+
+**2. Training the model**
+
+```
+model.fit(X_train, y_train)
+```
+
+It trains the model using training data.
+
+**3. Making predictions**
+
+```
+.predict(X_test)
+```
+
+It predicts whether the test messages are Spam or Ham.
+
+**4. Storing predictions**
+
+```
+y_pred =
+```
+
+Stores the predicted results in the variable `y_pred`.
+
+**5. Calculating accuracy**
+
+```
+metrics.accuracy_score(y_test, y_pred)
+```
+
+Compares actual results (`y_test`) with predicted results (`y_pred`) and calculates accuracy.
+
+**6. Printing results**
+
+```
+print()
+```
+
+Displays the accuracy of each model.
+
+# **Part 3: Important functions to remember**
+
+| Function             | Purpose                             |
+| -------------------- | ----------------------------------- |
+| `read_csv()`         | Reads the dataset                   |
+| `CountVectorizer()`  | Converts text into numbers          |
+| `fit_transform()`    | Learns vocabulary and converts text |
+| `toarray()`          | Converts data into an array         |
+| `DataFrame()`        | Creates a table                     |
+| `insert()`           | Adds a column                       |
+| `head()`             | Displays first five rows            |
+| `drop()`             | Removes a column                    |
+| `info()`             | Displays dataset information        |
+| `describe()`         | Displays statistical summary        |
+| `isnull()`           | Checks missing values               |
+| `iloc[]`             | Selects data by position            |
+| `train_test_split()` | Splits the dataset                  |
+| `fit()`              | Trains the model                    |
+| `predict()`          | Predicts the result                 |
+| `accuracy_score()`   | Calculates accuracy                 |
+
+# **Part 4: Practical conclusion**
+
+You can write this in your practical journal:
+
+**Conclusion:**
+
+Thus, we successfully implemented SMS Spam Detection using Machine Learning. We converted SMS text messages into numerical features using CountVectorizer and applied K-Nearest Neighbors, Linear SVM and Polynomial SVM algorithms. Finally, we evaluated and compared the performance of these models using accuracy.
+
+# **Part 5: Important points for your practical exam**
+
+## **Remember these 5 things**
+
+1. **Type:** Supervised Machine Learning – Classification.
+2. **Dataset:** SMS messages containing Spam and Ham labels.
+3. **Text conversion:** CountVectorizer.
+4. **Algorithms:** KNN, Linear SVM and Polynomial SVM.
+5. **Evaluation:** Accuracy Score.
+
+**One technical point:** Your code applies CountVectorizer before splitting the data. It will run, but for a more correct ML workflow, the vocabulary should be learned only from training messages using a Pipeline. For your current practical, understand the existing code as written.
+
+You should be able to explain these three things particularly well to your examiner: **CountVectorizer, KNN and SVM.**

@@ -1,0 +1,504 @@
+# **Practical: Bank Customer Churn Prediction Using Artificial Neural Network (ANN)**
+
+## **1. Theory**
+
+**Aim:** To predict whether a bank customer will leave the bank or continue using its services using an Artificial Neural Network (ANN).
+
+**What is Customer Churn?**
+
+Customer churn means when a customer stops using a company's or bank's services.
+
+This is a **binary classification problem** because there are only two possible outputs:
+
+- **0 – No Churn:** Customer stays with the bank.
+- **1 – Churn:** Customer leaves the bank.
+
+**What is ANN?**
+
+Artificial Neural Network (ANN) is a machine learning model inspired by the working of the human brain. It consists of connected units called neurons, arranged in layers.
+
+**Layers used in this program:**
+
+1. **Input Layer:** Takes customer information such as age, gender, country, balance and credit score.
+2. **Hidden Layers:** Learn patterns from the customer data.
+3. **Output Layer:** Predicts whether the customer will leave or stay.
+
+**Important concepts used:**
+
+- **Label Encoding:** Converts text values into numbers.
+- **One-Hot Encoding:** Converts categories into separate columns containing 0s and 1s.
+- **StandardScaler:** Scales numerical values so they are on a similar range.
+- **ReLU:** Activation function used in hidden layers.
+- **Sigmoid:** Converts the final output into a probability between 0 and 1.
+- **Binary Crossentropy:** Loss function used for binary classification.
+- **Adam:** Optimizer used to update model weights and reduce errors.
+- **Confusion Matrix:** Shows correct and incorrect predictions.
+- **Classification Report:** Displays precision, recall and F1-score.
+
+**Working of the program:**
+
+1. Load the bank customer dataset.
+2. Remove unnecessary columns.
+3. Separate input features and output.
+4. Convert text columns into numerical values.
+5. Split the dataset into training and testing data.
+6. Scale the input data.
+7. Build and train the ANN model.
+8. Predict customer churn.
+9. Evaluate the model using a confusion matrix, classification report and accuracy.
+
+## **2. Line-by-line code explanation**
+
+### **A. Importing libraries**
+
+```
+import pandas as pdimport numpy as npimport seaborn as snsimport matplotlib.pyplot as plt
+```
+
+- `pandas`: Used to read and handle the dataset.
+- `numpy`: Used for numerical operations and arrays.
+- `seaborn`: Used for data visualization.
+- `matplotlib.pyplot`: Used to create graphs.
+
+```
+from sklearn.compose import ColumnTransformer
+```
+
+Used to apply different preprocessing operations to selected columns.
+
+```
+from sklearn.model_selection import train_test_split
+```
+
+Splits the dataset into training and testing data.
+
+```
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+```
+
+- `LabelEncoder`: Converts text categories into numbers.
+- `OneHotEncoder`: Converts categories into separate binary columns.
+- `StandardScaler`: Scales numerical data.
+
+```
+from sklearn.svm import SVC, LinearSVCfrom sklearn.neighbors import KNeighborsClassifier
+```
+
+Imports SVM and KNN algorithms. **They are not used in this particular program.**
+
+```
+from sklearn import metricsfrom sklearn import preprocessing
+```
+
+Imports evaluation and preprocessing tools. These are also not directly used later in this code.
+
+### **B. Loading and exploring the dataset**
+
+```
+url = "https://raw.githubusercontent.com/sharmaroshan/Churn-Modelling-Dataset/master/Churn_Modelling.csv"df = pd.read_csv(url)
+```
+
+- `url` stores the dataset link.
+- `pd.read_csv()` reads the CSV file.
+- `df` stores the dataset in DataFrame format.
+
+```
+df.info()
+```
+
+Displays information about the dataset, such as columns, data types and non-null values.
+
+```
+df.head()
+```
+
+Displays the first five rows of the dataset.
+
+```
+df.drop(columns=['RowNumber', 'CustomerId', 'Surname'], inplace=True)
+```
+
+Removes unnecessary columns:
+
+- `RowNumber`: Row number.
+- `CustomerId`: Customer identification number.
+- `Surname`: Customer's last name.
+
+`inplace=True` means changes are made directly to the original DataFrame.
+
+```
+df.isna().sum()
+```
+
+Checks the number of missing values in each column.
+
+```
+df.describe()
+```
+
+Displays statistical information such as mean, minimum, maximum and standard deviation.
+
+### **C. Separating input and output**
+
+```
+X = df.iloc[:, :df.shape[1]-1].values
+```
+
+Stores all columns except the last column in `X`.
+
+These are the **independent variables**, or input features.
+
+```
+y = df.iloc[:, -1].values
+```
+
+Stores the last column (`Exited`) in `y`.
+
+This is the **dependent variable**, or output we want to predict.
+
+```
+X.shape, y.shape
+```
+
+Displays the dimensions of the input and output data.
+
+### **D. Converting text into numbers**
+
+```
+print(X[:8,1], '... will now become: ')
+```
+
+Displays the first eight values of the Geography column.
+
+```
+label_X_country_encoder = LabelEncoder()X[:,1] = label_X_country_encoder.fit_transform(X[:,1])
+```
+
+- Creates a LabelEncoder.
+- Converts country names into numbers.
+
+For example, France, Germany and Spain are represented by numeric labels.
+
+```
+print(X[:8,1])
+```
+
+Displays the converted country values.
+
+Similarly:
+
+```
+print(X[:6,2], '... will now become: ')label_X_gender_encoder = LabelEncoder()X[:,2] = label_X_gender_encoder.fit_transform(X[:,2])print(X[:6,2])
+```
+
+Converts the Gender column (Male/Female) into numerical values.
+
+### **E. One-Hot Encoding**
+
+```
+transform = ColumnTransformer([("countries", OneHotEncoder(), [1])],                              remainder="passthrough", sparse_threshold=0)
+```
+
+Creates a ColumnTransformer.
+
+- Applies OneHotEncoder to column number 1 (Geography).
+- `remainder="passthrough"` keeps all other columns unchanged.
+- `sparse_threshold=0` makes the result a dense array.
+
+```
+X = transform.fit_transform(X)
+```
+
+Converts the Geography column into separate binary columns.
+
+For example, a country category may be represented using columns like:
+
+| France | Germany | Spain |
+| ------ | ------- | ----- |
+| 1      | 0       | 0     |
+| 0      | 1       | 0     |
+| 0      | 0       | 1     |
+
+```
+X = X.astype(float)
+```
+
+Converts all input values into floating-point numbers.
+
+```
+X = X[:,1:]
+```
+
+Removes the first column from the encoded data. This avoids keeping all the Geography dummy columns and helps prevent redundant information.
+
+```
+X.shape
+```
+
+Displays the updated dimensions of X.
+
+### **F. Splitting the dataset**
+
+```
+X_train, X_test, y_train, y_test = train_test_split(    X, y, test_size=0.2, random_state=0)
+```
+
+Splits the dataset into two parts:
+
+- **80% training data:** Used to train the model.
+- **20% testing data:** Used to test the model.
+
+`random_state=0` ensures the same split is produced when the code is run again.
+
+### **G. Feature scaling**
+
+```
+sc = StandardScaler()
+```
+
+Creates a StandardScaler object.
+
+```
+X_train[:, np.array([2,4,5,6,7,10])] = sc.fit_transform(    X_train[:, np.array([2,4,5,6,7,10])])
+```
+
+Scales selected columns of the training data.
+
+`fit_transform()` learns the scaling values from the training data and applies the scaling.
+
+```
+X_test[:, np.array([2,4,5,6,7,10])] = sc.transform(    X_test[:, np.array([2,4,5,6,7,10])])
+```
+
+Applies the same scaling values to the testing data.
+
+```
+sc = StandardScaler()X_train = sc.fit_transform(X_train)X_test = sc.transform(X_test)
+```
+
+Scales all input features again. The earlier selected-column scaling is therefore redundant; the second scaling already handles all columns.
+
+### **H. Building the ANN model**
+
+```
+from tensorflow.keras.models import Sequentialfrom tensorflow.keras.layers import Dense, Input
+```
+
+Imports:
+
+- `Sequential`: Creates a neural network layer by layer.
+- `Dense`: Creates a fully connected layer.
+- `Input`: Defines the shape of the input data.
+
+```
+classifier = Sequential()
+```
+
+Creates an empty ANN model.
+
+```
+classifier.add(Input(shape=(11,)))
+```
+
+Defines the input layer with 11 input features.
+
+```
+classifier.add(Dense(units=256, activation='relu',                     kernel_initializer='random_uniform'))
+```
+
+Adds a hidden layer with 256 neurons.
+
+- `units=256`: Number of neurons.
+- `activation='relu'`: Uses ReLU activation.
+- `kernel_initializer='random_uniform'`: Initializes weights with random values.
+
+```
+classifier.add(Dense(units=512, activation='relu',                     kernel_initializer='random_uniform'))classifier.add(Dense(units=256, activation='relu',                     kernel_initializer='random_uniform'))classifier.add(Dense(units=128, activation='relu',                     kernel_initializer='random_uniform'))
+```
+
+Adds three more hidden layers containing 512, 256 and 128 neurons respectively.
+
+```
+classifier.add(Dense(units=1, activation='sigmoid',                     kernel_initializer='random_uniform'))
+```
+
+Adds the output layer.
+
+- `units=1`: One output neuron.
+- `sigmoid`: Produces a probability between 0 and 1.
+
+This probability indicates whether the customer is likely to leave the bank.
+
+### **I. Compiling the model**
+
+```
+classifier.compile(    optimizer='adam',    loss='binary_crossentropy',    metrics=['accuracy'])
+```
+
+Configures the ANN model.
+
+- `adam`: Optimizer that updates model weights.
+- `binary_crossentropy`: Loss function for binary classification.
+- `accuracy`: Measures the percentage of correct predictions.
+
+```
+classifier.summary()
+```
+
+Displays the model structure, layers, output shapes and number of parameters.
+
+### **J. Training the model**
+
+```
+classifier.fit(    X_train, y_train.astype(int),    validation_data=(X_test, y_test.astype(int)),    epochs=20,    batch_size=32)
+```
+
+Trains the ANN model.
+
+- `X_train`: Training input.
+- `y_train`: Actual training output.
+- `astype(int)`: Converts output values into integers.
+- `validation_data`: Uses testing data to monitor performance during training.
+- `epochs=20`: Trains the model for 20 complete rounds.
+- `batch_size=32`: Processes 32 records at a time.
+
+### **K. Making predictions**
+
+```
+y_pred = classifier.predict(X_test)
+```
+
+Predicts the probability of customer churn for testing data.
+
+```
+y_pred
+```
+
+Displays the predicted probabilities.
+
+```
+y_pred = (y_pred > 0.5)
+```
+
+Converts probabilities into binary outputs:
+
+- Greater than 0.5 → `True` (Churn = 1).
+- 0.5 or less → `False` (No Churn = 0).
+
+### **L. Evaluating the model**
+
+```
+from sklearn.metrics import confusion_matrix, classification_report
+```
+
+Imports evaluation functions.
+
+```
+cm1 = confusion_matrix(y_test.astype(int), y_pred)cm1
+```
+
+Creates and displays the confusion matrix.
+
+| Term                | Meaning                                       |
+| ------------------- | --------------------------------------------- |
+| True Negative (TN)  | Correctly predicted customer stays            |
+| False Positive (FP) | Predicted customer leaves, but actually stays |
+| False Negative (FN) | Predicted customer stays, but actually leaves |
+| True Positive (TP)  | Correctly predicted customer leaves           |
+
+```
+print(classification_report(y_test.astype(int), y_pred))
+```
+
+Displays:
+
+- **Precision:** How many predicted positive cases were actually positive.
+- **Recall:** How many actual positive cases were correctly identified.
+- **F1-score:** Balance between precision and recall.
+- **Support:** Number of actual samples in each class.
+
+```
+accuracy_model1 = (    (cm1[0][0]+cm1[1][1])*100) / (    cm1[0][0]+cm1[1][1]+cm1[0][1]+cm1[1][0])
+```
+
+Calculates the model's accuracy using the confusion matrix.
+
+```
+print(accuracy_model1, '% of testing data was classified correctly')
+```
+
+Displays the final accuracy percentage.
+
+**Accuracy formula:**
+
+\\[ Accuracy = \frac{TP+TN}{TP+TN+FP+FN}\times100 \\]
+
+## **3. Important 10 oral (viva) questions with answers**
+
+**1. What is customer churn?**
+
+Customer churn means when a customer stops using a company's or bank's services.
+
+**2. What is ANN?**
+
+ANN stands for Artificial Neural Network. It is a machine learning model inspired by the human brain.
+
+**3. Which type of machine learning is used in this practical?**
+
+Supervised learning, because the dataset contains input data and known output labels.
+
+**4. Is this a classification or regression problem?**
+
+It is a binary classification problem because it predicts only two classes: 0 or 1.
+
+**5. What is the meaning of 0 and 1 in this dataset?**
+
+- 0 means the customer will stay.
+- 1 means the customer will leave the bank.
+
+**6. What is the use of Label Encoding?**
+
+It converts text categories into numerical values.
+
+**7. What is One-Hot Encoding?**
+
+It converts categorical values into separate columns containing 0s and 1s.
+
+**8. What is the use of StandardScaler?**
+
+It scales numerical features so they have a similar scale, which helps the neural network learn effectively.
+
+**9. What is the difference between ReLU and Sigmoid?**
+
+- ReLU is used in hidden layers to introduce non-linearity.
+- Sigmoid is used in the output layer to produce a probability between 0 and 1.
+
+**10. What is a confusion matrix?**
+
+A confusion matrix is used to evaluate a classification model. It shows correct and incorrect predictions using TP, TN, FP and FN.
+
+## **4. Important points to remember for your practical**
+
+| Question          | Answer                          |
+| ----------------- | ------------------------------- |
+| Practical topic   | Bank Customer Churn Prediction  |
+| Algorithm         | Artificial Neural Network (ANN) |
+| Learning type     | Supervised Learning             |
+| Problem type      | Binary Classification           |
+| Dataset           | Churn_Modelling.csv             |
+| Target column     | Exited                          |
+| Input layer       | 11 features                     |
+| Hidden layers     | 256, 512, 256, 128 neurons      |
+| Output layer      | 1 neuron                        |
+| Output activation | Sigmoid                         |
+| Optimizer         | Adam                            |
+| Loss function     | Binary Crossentropy             |
+| Epochs            | 20                              |
+| Batch size        | 32                              |
+| Train-test split  | 80% – 20%                       |
+
+**One technical point about your code:** You are scaling selected columns and then scaling all columns again. The first scaling step is unnecessary. Also, ideally, categorical encoding should be fitted only on training data to avoid data leakage. Your code's main ANN workflow is understandable, but these are improvements worth knowing.
+
+**Remember this sentence for your practical exam:**
+
+"My program uses an Artificial Neural Network to predict whether a bank customer will leave the bank or continue using its services. It uses customer details as input and gives the prediction in two classes, 0 or 1."

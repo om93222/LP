@@ -1,0 +1,50 @@
+
+import timeit
+
+# Non-recursive Fibonacci function
+def fibonacci(n):
+    fib_list = [0] * (n + 1)
+
+    if n >= 1:
+        fib_list[1] = 1
+
+    for i in range(2, n + 1):
+        fib_list[i] = fib_list[i - 1] + fib_list[i - 2]
+
+    return fib_list[n]
+
+
+# Recursive Fibonacci function
+def fibonacci_recursive(n):
+    if n == 0:
+        return 0
+
+    if n == 1:
+        return 1
+
+    return fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2)
+
+
+N = 20
+RUNS = 1000
+
+print(f"Given N = {N}")
+print(f"{RUNS} runs")
+
+# Non-recursive execution
+print(
+    "Fibonacci non-recursive:",
+    fibonacci(N),
+    "\tTime:",
+    f"{timeit.timeit(lambda: fibonacci(N), number=RUNS):.6f}",
+    "\tO(n) Time\tO(n) Space"
+)
+
+# Recursive execution
+print(
+    "Fibonacci recursive:",
+    fibonacci_recursive(N),
+    "\tTime:",
+    f"{timeit.timeit(lambda: fibonacci_recursive(N), number=RUNS):.6f}",
+    "\tO(2^n) Time\tO(n) Space"
+)

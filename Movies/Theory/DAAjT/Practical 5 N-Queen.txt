@@ -1,0 +1,167 @@
+Practical 5: N-Queen Problem Using Backtracking
+1. Aim
+To design an N-Queen matrix with the first queen already placed and use Backtracking to place the remaining queens to obtain the final N-Queen matrix.
+2. Theory
+The N-Queen Problem is a famous problem in which we have to place N queens on an N × N chessboard.
+
+The main condition is that no two queens should attack each other.
+
+Therefore:
+- No two queens should be in the same row.
+- No two queens should be in the same column.
+- No two queens should be on the same diagonal.
+Backtracking is an algorithmic technique that tries to place queens one by one. If a position is not safe, it removes the previously placed queen and tries another position.
+3. Algorithm
+1. Start.
+2. Read the value of N.
+3. Create an N × N chessboard and initialize it with zeros.
+4. Place the first queen at position [0][0].
+5. Check whether the next position is safe.
+6. If safe, place the queen.
+7. Move to the next row and repeat.
+8. If no safe position is available, remove the previously placed queen.
+9. Try another column.
+10. Print the final N-Queen matrix.
+11. Stop.
+4. Explanation of your code in simple words
+Step 1: Declare N
+static int N;
+
+
+It stores the size of the chessboard.
+
+For example, if N = 4, the board will have 4 rows and 4 columns.
+Step 2: Print the solution
+static void printSolution(int board[][])
+
+
+This method prints the final chessboard matrix.
+- 1 means queen is placed.
+- 0 means empty position.
+Step 3: Check safe position
+static boolean isSafe(int board[][], int row, int col)
+
+
+This method checks whether a queen can be placed safely.
+
+It checks three conditions:
+1. Same column.
+2. Upper-left diagonal.
+3. Upper-right diagonal.
+If another queen is found, it returns false. Otherwise, it returns true.
+Step 4: Solve using Backtracking
+static boolean solveNQueen(int board[][], int row)
+
+
+This is the main method of the algorithm.
+- It checks each column in the current row.
+- If the position is safe, it places a queen.
+- Then it moves to the next row.
+- If no solution is found, it removes the queen and tries another position.
+Step 5: Backtracking
+board[row][col] = 0;
+
+
+This is the most important statement.
+
+It removes the queen from the current position when that position does not lead to a solution.
+
+This process is called Backtracking.
+Step 6: Main method
+N = sc.nextInt();
+
+int board[][] = new int[N][N];
+
+board[0][0] = 1;
+
+
+- Takes N from the user.
+- Creates the chessboard.
+- Places the first queen at row 0, column 0.
+- Calls the solveNQueen() method to place the remaining queens.
+5. Sample input and output
+Input
+Enter value of N: 4
+
+
+Output
+N Queen Matrix:
+1 0 0 0
+0 0 1 0
+0 0 0 1
+0 1 0 0
+
+
+Solution found
+
+
+
+
+
+
+
+
+
+tutorialspoint.com
+
+
+Note: Your program fixes the first queen at [0][0], so it finds a solution consistent with that position.
+6. Time and Space Complexity
+Complexity	Value
+Time Complexity	O(N!) (commonly stated upper bound)
+Space Complexity	O(N²) for the board
+
+
+7. Top 10 important viva questions
+1. What is the N-Queen Problem?
+
+It is a problem of placing N queens on an N × N chessboard so that no two queens attack each other.
+
+2. Which technique is used in this program?
+
+Backtracking.
+
+3. What is Backtracking?
+
+It is a technique that tries a solution and goes back if the solution is not correct.
+
+4. How many queens are placed on the board?
+
+N queens.
+
+5. What does 1 represent in the matrix?
+
+1 represents the position of a queen.
+
+6. What does 0 represent?
+
+0 represents an empty position.
+
+7. What are the conditions for placing queens?
+
+No two queens should be in the same row, column or diagonal.
+
+8. What is the purpose of the isSafe() method?
+
+It checks whether a position is safe for placing a queen.
+
+9. Why do we use board[row][col] = 0?
+
+To remove a queen when the current position does not lead to a solution. This is called Backtracking.
+
+10. Why is the first queen placed at [0][0]?
+
+Because the question specifies that the first queen must already be placed before solving the remaining positions.
+
+8. Five additional viva questions
+Question	Answer
+What is recursion?	A method calling itself.
+What is a chessboard matrix?	A 2D array.
+Can two queens share a diagonal?	No.
+What does isSafe() return?	True or false.
+What happens if no solution exists?	It prints "Solution does not exist."
+
+9. What to explain to your mam
+You can explain it like this:
+
+"Ma'am, this program solves the N-Queen Problem using Backtracking. First, we create an N × N matrix and place the first queen at position zero-zero. Then we check safe positions using the isSafe method. If the position is safe, we place the queen and move to the next row. If no safe position is available, we remove the previous queen and try another position. Finally, we print the N-Queen matrix."
